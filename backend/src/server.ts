@@ -73,6 +73,7 @@ class Server {
         endpoints: {
           health: '/api/health',
           tokens: '/api/tokens',
+          liveblocks: '/api/liveblocks/auth',
         },
       });
     });

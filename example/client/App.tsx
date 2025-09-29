@@ -8,6 +8,7 @@ import {
 } from '@chakra-ui/react'
 import { CollaborationPanel } from './features/collaboration'
 import { TldrawCanvas } from './features/tldraw'
+import { Room } from './providers/Room'
 
 function App() {
 	const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
@@ -125,14 +126,16 @@ function App() {
 			)}
 
 			{/* Right Panel - TLdraw Canvas */}
-			<Box 
-				w={isCanvasCollapsed ? "0" : `${100 - splitPercentage}%`}
-				transition={isDragging ? "none" : "width 0.3s ease"}
-				overflow="hidden"
-				position="relative"
-			>
-				<TldrawCanvas isVisible={!isCanvasCollapsed} />
-			</Box>
+			<Room roomId="tldraw-collaborative-canvas">
+				<Box 
+					w={isCanvasCollapsed ? "0" : `${100 - splitPercentage}%`}
+					transition={isDragging ? "none" : "width 0.3s ease"}
+					overflow="hidden"
+					position="relative"
+				>
+					<TldrawCanvas isVisible={!isCanvasCollapsed} />
+				</Box>
+			</Room>
 
 			{/* Status Bar */}
 			<Box

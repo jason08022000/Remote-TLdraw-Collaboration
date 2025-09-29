@@ -129,6 +129,15 @@ importers:
       '@google/generative-ai':
         specifier: ^0.21.0
         version: 0.21.0
+      '@liveblocks/core':
+        specifier: ^3.7.1
+        version: 3.7.1(@types/json-schema@7.0.15)
+      '@liveblocks/react':
+        specifier: ^3.7.1
+        version: 3.7.1(@types/json-schema@7.0.15)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react@18.3.1)
+      '@liveblocks/yjs':
+        specifier: ^3.7.1
+        version: 3.7.1(@types/json-schema@7.0.15)(yjs@13.6.27)
       '@stream-io/video-react-sdk':
         specifier: ^1.21.3
         version: 1.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.2)
@@ -165,6 +174,12 @@ importers:
       tldraw:
         specifier: 'catalog:'
         version: 3.10.2(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      y-utility:
+        specifier: ^0.1.4
+        version: 0.1.4(yjs@13.6.27)
+      yjs:
+        specifier: ^13.6.19
+        version: 13.6.27
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -1180,6 +1195,35 @@ packages:
 
   '@kurkle/color@0.3.4':
     resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
+
+  '@liveblocks/client@3.7.1':
+    resolution: {integrity: sha512-vyjJJHv7lkX0B5fYTS0VEx+MPA7uMlNhlsySs7rQI4K00EKo+OBfG+eTl3B9RAG09dNs5Z/0vB0d8ATxFAuyKA==}
+
+  '@liveblocks/core@3.7.1':
+    resolution: {integrity: sha512-xeASXOU5RnyJh9uZiac5w1HqR7D2MzD6hX+hLfkQY2a/rFip9kDi3WXY7J2TXqs8VB+Do3e0bYKATwGaZoOlvw==}
+    peerDependencies:
+      '@types/json-schema': ^7
+
+  '@liveblocks/react@3.7.1':
+    resolution: {integrity: sha512-baaN6avgx3TKkXV+WxN4GTzIIuH4eH2dca+OSmf6VLuF9Wxr6qvPItlIw4r63FsZWPyCnp9cmabiXw3Awl/QkA==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^18 || ^19 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+
+  '@liveblocks/yjs@3.7.1':
+    resolution: {integrity: sha512-GSuUqGKPddWB9AHhVsvNWe5LhBhCJDkAiaeM3CJ44YCSgH/fWV4JGnB0mnTscARmin46S353eC8R9eHTKMoo9g==}
+    peerDependencies:
+      yjs: ^13.6.1
+
+  '@noble/hashes@1.8.0':
+    resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
+    engines: {node: ^14.21.3 || >=16}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -3946,6 +3990,9 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
+  isomorphic.js@0.2.5:
+    resolution: {integrity: sha512-PIeMbHqMt4DnUP3MA/Flc0HElYjMXArsw1qwJZcm9sqR8mq3l8NYizFMty0pWwE/tzIGH3EKK5+jes5mAr85yw==}
+
   itty-router@5.0.18:
     resolution: {integrity: sha512-mK3ReOt4ARAGy0V0J7uHmArG2USN2x0zprZ+u+YgmeRjXTDbaowDy3kPcsmQY6tH+uHhDgpWit9Vqmv/4rTXwA==}
 
@@ -3956,6 +4003,9 @@ packages:
   jittered-fractional-indexing@1.0.0:
     resolution: {integrity: sha512-sCFp83Upn1UzNgqSpWabWfkFtBwIjH+QyyJxLCGRamsIwOCs0Fx0yYxva9/NYV/iMLlUN3/xZY8/ZdYIwIlJ5g==}
     engines: {node: '>=18.0.0'}
+
+  js-base64@3.7.8:
+    resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -3991,6 +4041,11 @@ packages:
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
+
+  lib0@0.2.114:
+    resolution: {integrity: sha512-gcxmNFzA4hv8UYi8j43uPlQ7CGcyMJ2KQb5kZASw6SnAKAf10hK12i2fjrS3Cl/ugZa5Ui6WwIu1/6MIXiHttQ==}
+    engines: {node: '>=16'}
+    hasBin: true
 
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
@@ -5011,6 +5066,18 @@ packages:
       utf-8-validate:
         optional: true
 
+  y-indexeddb@9.0.12:
+    resolution: {integrity: sha512-9oCFRSPPzBK7/w5vOkJBaVCQZKHXB/v6SIT+WYhnJxlEC61juqG0hBrAf+y3gmSMLFLwICNH9nQ53uscuse6Hg==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    peerDependencies:
+      yjs: ^13.0.0
+
+  y-utility@0.1.4:
+    resolution: {integrity: sha512-i8HSo2DGRB13PSm9B0hbljPBramKWK2Gi9R+ZCPrstyIx0VJAdcaurGdYTmcu2SBJI9HWcSCW0siSF2SyRa4lg==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      yjs: ^13.5.29
+
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
@@ -5026,6 +5093,10 @@ packages:
   yargs@17.7.2:
     resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
     engines: {node: '>=12'}
+
+  yjs@13.6.27:
+    resolution: {integrity: sha512-OIDwaflOaq4wC6YlPBy2L6ceKeKuF7DeTxx+jPzv1FHn9tCZ0ZwSRnUBxD05E3yed46fv/FWJbvR+Ud7x0L7zw==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
 
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
@@ -5852,6 +5923,40 @@ snapshots:
   '@kamilkisiela/fast-url-parser@1.1.4': {}
 
   '@kurkle/color@0.3.4': {}
+
+  '@liveblocks/client@3.7.1(@types/json-schema@7.0.15)':
+    dependencies:
+      '@liveblocks/core': 3.7.1(@types/json-schema@7.0.15)
+    transitivePeerDependencies:
+      - '@types/json-schema'
+
+  '@liveblocks/core@3.7.1(@types/json-schema@7.0.15)':
+    dependencies:
+      '@types/json-schema': 7.0.15
+
+  '@liveblocks/react@3.7.1(@types/json-schema@7.0.15)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react@18.3.1)':
+    dependencies:
+      '@liveblocks/client': 3.7.1(@types/json-schema@7.0.15)
+      '@liveblocks/core': 3.7.1(@types/json-schema@7.0.15)
+      react: 18.3.1
+    optionalDependencies:
+      '@types/react': 18.3.18
+      '@types/react-dom': 18.3.5(@types/react@18.3.18)
+    transitivePeerDependencies:
+      - '@types/json-schema'
+
+  '@liveblocks/yjs@3.7.1(@types/json-schema@7.0.15)(yjs@13.6.27)':
+    dependencies:
+      '@liveblocks/client': 3.7.1(@types/json-schema@7.0.15)
+      '@liveblocks/core': 3.7.1(@types/json-schema@7.0.15)
+      '@noble/hashes': 1.8.0
+      js-base64: 3.7.8
+      y-indexeddb: 9.0.12(yjs@13.6.27)
+      yjs: 13.6.27
+    transitivePeerDependencies:
+      - '@types/json-schema'
+
+  '@noble/hashes@1.8.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -9025,6 +9130,8 @@ snapshots:
 
   isexe@2.0.0: {}
 
+  isomorphic.js@0.2.5: {}
+
   itty-router@5.0.18: {}
 
   jackspeak@4.1.0:
@@ -9034,6 +9141,8 @@ snapshots:
   jittered-fractional-indexing@1.0.0:
     dependencies:
       fractional-indexing: 3.2.0
+
+  js-base64@3.7.8: {}
 
   js-tokens@4.0.0: {}
 
@@ -9061,6 +9170,10 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+
+  lib0@0.2.114:
+    dependencies:
+      isomorphic.js: 0.2.5
 
   lines-and-columns@1.2.4: {}
 
@@ -10192,6 +10305,16 @@ snapshots:
 
   ws@8.18.0: {}
 
+  y-indexeddb@9.0.12(yjs@13.6.27):
+    dependencies:
+      lib0: 0.2.114
+      yjs: 13.6.27
+
+  y-utility@0.1.4(yjs@13.6.27):
+    dependencies:
+      lib0: 0.2.114
+      yjs: 13.6.27
+
   y18n@5.0.8: {}
 
   yaml@1.10.2: {}
@@ -10207,6 +10330,10 @@ snapshots:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 21.1.1
+
+  yjs@13.6.27:
+    dependencies:
+      lib0: 0.2.114
 
   yocto-queue@0.1.0: {}
 

@@ -23,7 +23,25 @@ export class LiveblocksService {
       // Authorize access to all rooms for this demo
       session.allow('*', session.FULL_ACCESS);
 
-      return await session.authorize();
+      const authResult = await session.authorize();
+      
+      // Parse the Liveblocks response to extract the actual token
+      if (typeof authResult === 'string') {
+        return authResult;
+      }
+      
+      // If authResult is an object, extract the token from the body
+      if (authResult && typeof authResult === 'object' && 'body' in authResult) {
+        const body = typeof authResult.body === 'string' 
+          ? JSON.parse(authResult.body)
+          : authResult.body;
+        
+        if (body && body.token) {
+          return body.token;
+        }
+      }
+      
+      throw new Error('Invalid auth response format from Liveblocks');
     } catch (error) {
       throw new Error(`Failed to create Liveblocks session: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }

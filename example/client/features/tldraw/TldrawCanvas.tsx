@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react'
 import { Box } from '@chakra-ui/react'
 import { Editor, Tldraw } from 'tldraw'
+import { useCollaborativeTldraw } from '../../hooks/useCollaborativeTldraw'
 import { AiInputBar } from './AiInputBar'
 
 interface TldrawCanvasProps {
 	isVisible: boolean
 }
 
-export function TldrawCanvas({ isVisible }: TldrawCanvasProps) {
+// Toggle this to disable collaboration for testing
+const USE_COLLABORATION = true;
+
+function CollaborativeTldrawCanvas({ isVisible }: TldrawCanvasProps) {
 	const [editor, setEditor] = useState<Editor | null>(null)
+	const store = useCollaborativeTldraw()
 
 	// Put the editor on the window for debugging
 	useEffect(() => {
@@ -26,14 +31,25 @@ export function TldrawCanvas({ isVisible }: TldrawCanvasProps) {
 		>
 			{/* TLdraw Canvas */}
 			<Box position="relative" overflow="hidden">
-				<Tldraw 
-					persistenceKey="tldraw-ai-demo" 
-					onMount={setEditor}
-				/>
+				{USE_COLLABORATION ? (
+					<Tldraw 
+						store={store}
+						onMount={setEditor}
+					/>
+				) : (
+					<Tldraw 
+						persistenceKey="tldraw-local-demo" 
+						onMount={setEditor}
+					/>
+				)}
 			</Box>
 			
 			{/* AI Input Bar */}
 			{editor && <AiInputBar editor={editor} />}
 		</Box>
 	)
+}
+
+export function TldrawCanvas({ isVisible }: TldrawCanvasProps) {
+	return <CollaborativeTldrawCanvas isVisible={isVisible} />
 }

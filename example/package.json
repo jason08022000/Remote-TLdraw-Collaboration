@@ -19,6 +19,9 @@
 		"@emotion/react": "^11.14.0",
 		"@emotion/styled": "^11.14.1",
 		"@google/generative-ai": "^0.21.0",
+		"@liveblocks/core": "^3.7.1",
+		"@liveblocks/react": "^3.7.1",
+		"@liveblocks/yjs": "^3.7.1",
 		"@stream-io/video-react-sdk": "^1.21.3",
 		"@tldraw/ai": "workspace:",
 		"@tldraw/tlschema": "catalog:",
@@ -31,6 +34,8 @@
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"tldraw": "catalog:",
+		"y-utility": "^0.1.4",
+		"yjs": "^13.6.19",
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {
