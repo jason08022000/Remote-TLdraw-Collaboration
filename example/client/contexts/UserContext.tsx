@@ -1,9 +1,11 @@
-import { createContext, useContext, useState, useCallback, PropsWithChildren } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, PropsWithChildren } from 'react';
 
 interface UserContextType {
   userName: string;
-  setUserName: (name: string) => void;
-  hasSetName: boolean;
+  roomId: string;
+  setUserDetails: (name: string, room: string) => void;
+  resetUserDetails: () => void;
+  hasSetDetails: boolean;
   userId: string;
   userColor: string;
 }
@@ -12,7 +14,27 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: PropsWithChildren) {
   const [userName, setUserNameState] = useState('');
-  const [hasSetName, setHasSetName] = useState(false);
+  const [roomId, setRoomIdState] = useState('');
+  const [hasSetDetails, setHasSetDetails] = useState(() => {
+    const stored = sessionStorage.getItem('tldraw-user-session');
+    if (stored) {
+      const user = JSON.parse(stored);
+      return !!(user.name && user.roomId);
+    }
+    return false;
+  });
+
+  // Initialize from storage if available
+  useEffect(() => {
+    const stored = sessionStorage.getItem('tldraw-user-session');
+    if (stored) {
+      const user = JSON.parse(stored);
+      if (user.name && user.roomId) {
+        setUserNameState(user.name);
+        setRoomIdState(user.roomId);
+      }
+    }
+  }, []);
 
   // Generate consistent user ID and color
   const [userId] = useState(() => {
@@ -44,24 +66,37 @@ export function UserProvider({ children }: PropsWithChildren) {
     return colors[Math.floor(Math.random() * colors.length)];
   });
 
-  const setUserName = useCallback((name: string) => {
+  const setUserDetails = useCallback((name: string, room: string) => {
     setUserNameState(name);
-    setHasSetName(true);
+    setRoomIdState(room);
+    setHasSetDetails(true);
     
     // Update session storage
     const userSession = {
       id: userId,
       color: userColor,
       name: name,
+      roomId: room,
     };
     sessionStorage.setItem('tldraw-user-session', JSON.stringify(userSession));
   }, [userId, userColor]);
 
+  const resetUserDetails = useCallback(() => {
+    setUserNameState('');
+    setRoomIdState('');
+    setHasSetDetails(false);
+    
+    // Clear session storage
+    sessionStorage.removeItem('tldraw-user-session');
+  }, []);
+
   return (
     <UserContext.Provider value={{
       userName,
-      setUserName,
-      hasSetName,
+      roomId,
+      setUserDetails,
+      resetUserDetails,
+      hasSetDetails,
       userId,
       userColor,
     }}>

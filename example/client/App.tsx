@@ -13,7 +13,7 @@ import { NameInput } from './components/NameInput'
 import { useUser } from './contexts/UserContext'
 
 function App() {
-	const { hasSetName } = useUser()
+	const { hasSetDetails, roomId, userName, resetUserDetails } = useUser()
 	const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
 	const [splitPercentage, setSplitPercentage] = useState(50) // 50% split by default
 	const [isDragging, setIsDragging] = useState(false)
@@ -69,8 +69,8 @@ function App() {
 	const toggleBg = 'white'
 	const borderColor = 'gray.200'
 
-	// Show name input if user hasn't set their name yet
-	if (!hasSetName) {
+	// Show name input if user hasn't set their details yet
+	if (!hasSetDetails) {
 		return <NameInput />
 	}
 
@@ -134,7 +134,7 @@ function App() {
 			)}
 
 			{/* Right Panel - TLdraw Canvas */}
-			<Room roomId="tldraw-collaborative-canvas">
+			<Room roomId={roomId}>
 				<Box 
 					w={isCanvasCollapsed ? "0" : `${100 - splitPercentage}%`}
 					transition={isDragging ? "none" : "width 0.3s ease"}
@@ -159,8 +159,29 @@ function App() {
 				transition={isDragging ? "none" : "right 0.3s ease"}
 			>
 				<HStack h="100%" justify="space-between" fontSize="xs" color="gray.500">
-					<Text>Ready</Text>
 					<HStack gap={3}>
+						<Text>Ready</Text>
+						<Text>•</Text>
+						<Text>{userName} in {roomId}</Text>
+					</HStack>
+					<HStack gap={3}>
+						<Button
+							size="xs"
+							variant="ghost"
+							color="gray.600"
+							fontSize="xs"
+							h="16px"
+							minW="auto"
+							px={2}
+							onClick={resetUserDetails}
+							_hover={{
+								bg: "gray.200",
+								color: "gray.800"
+							}}
+						>
+							Change Details
+						</Button>
+						<Text>•</Text>
 						<Text>Collaboration</Text>
 						{!isCanvasCollapsed && <Text>•</Text>}
 						{!isCanvasCollapsed && <Text>Canvas</Text>}

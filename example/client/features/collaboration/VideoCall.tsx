@@ -5,8 +5,10 @@ import {
 	Input,
 	Text,
 	Stack,
+	HStack,
 	Heading
 } from '@chakra-ui/react'
+import { LuMic, LuMicOff, LuVideo, LuVideoOff } from 'react-icons/lu'
 import {
 	Call,
 	CallControls,
@@ -32,11 +34,12 @@ const isWebRTCSupported = (): boolean => {
 
 export function VideoCall() {
 	const { client, isConnected, connectUser } = useVideo()
-	const { userName } = useUser()
-	const [callId, setCallId] = useState('')
+	const { userName, roomId } = useUser()
 	const [activeCall, setActiveCall] = useState<Call | null>(null)
 	const [isJoining, setIsJoining] = useState(false)
 	const [webRTCSupported, setWebRTCSupported] = useState(true)
+	const [isMicEnabled, setIsMicEnabled] = useState(true)
+	const [isCameraEnabled, setIsCameraEnabled] = useState(true)
 
 	useEffect(() => {
 		setWebRTCSupported(isWebRTCSupported())
@@ -77,8 +80,42 @@ export function VideoCall() {
 		}
 	}, [activeCall])
 
+	const toggleMicrophone = useCallback(async () => {
+		if (activeCall) {
+			try {
+				if (isMicEnabled) {
+					await activeCall.microphone.disable()
+				} else {
+					await activeCall.microphone.enable()
+				}
+				setIsMicEnabled(!isMicEnabled)
+			} catch (error) {
+				console.warn('Failed to toggle microphone:', error)
+			}
+		} else {
+			setIsMicEnabled(!isMicEnabled)
+		}
+	}, [activeCall, isMicEnabled])
+
+	const toggleCamera = useCallback(async () => {
+		if (activeCall) {
+			try {
+				if (isCameraEnabled) {
+					await activeCall.camera.disable()
+				} else {
+					await activeCall.camera.enable()
+				}
+				setIsCameraEnabled(!isCameraEnabled)
+			} catch (error) {
+				console.warn('Failed to toggle camera:', error)
+			}
+		} else {
+			setIsCameraEnabled(!isCameraEnabled)
+		}
+	}, [activeCall, isCameraEnabled])
+
 	const handleJoinCall = async () => {
-		if (!client || !callId.trim()) return
+		if (!client || !roomId.trim()) return
 
 		// Check WebRTC support before attempting to join
 		if (!webRTCSupported) {
@@ -88,23 +125,31 @@ export function VideoCall() {
 
 		try {
 			setIsJoining(true)
-			const call = client.call('default', callId.trim())
+			const call = client.call('default', roomId.trim())
 
 			// Join the call first - let Stream SDK handle WebRTC setup
 			await call.join({ create: true })
 
 			// Set as active call
 			setActiveCall(call)
-			console.log(`Successfully joined call: ${callId.trim()}`)
+			console.log(`Successfully joined call: ${roomId.trim()}`)
 
-			// Enable camera and microphone after successful join
+			// Apply initial mic/camera settings based on user preferences
 			try {
-				await call.camera.enable()
-				await call.microphone.enable()
-				console.log('Camera and microphone enabled successfully')
+				if (isMicEnabled) {
+					await call.microphone.enable()
+				} else {
+					await call.microphone.disable()
+				}
+				
+				if (isCameraEnabled) {
+					await call.camera.enable()
+				} else {
+					await call.camera.disable()
+				}
+				console.log('Applied initial media settings')
 			} catch (mediaError) {
-				console.warn('Media permissions issue, call will work but without camera/mic:', mediaError)
-				// Call still works, user can enable manually via call controls
+				console.warn('Media permissions issue, call will work but controls may not function:', mediaError)
 			}
 
 		} catch (error: any) {
@@ -176,55 +221,60 @@ export function VideoCall() {
 					</Box>
 				)}
 
-				{!isConnected ? (
-					<Stack direction="column" gap={4} w="100%">
-						<Box w="100%" p={4} bg="blue.50" borderRadius="md" borderColor="blue.200" border="1px solid">
-							<Text fontSize="sm" color="blue.600" mb={1} fontWeight="medium">
-								Welcome, {userName}!
-							</Text>
-							<Text fontSize="xs" color="blue.500">
-								{isJoining ? 'Connecting to video service...' : 'Setting up video calling'}
-							</Text>
-						</Box>
-						{isJoining && (
-							<Box textAlign="center" py={2}>
-								<Text fontSize="sm" color="gray.500">
-									Connecting...
-								</Text>
-							</Box>
-						)}
-					</Stack>
-				) : (
-					<Stack direction="column" gap={4} w="100%">
-						<Text fontSize="sm" color="green.600" fontWeight="medium">
-							Connected as {userName}
-						</Text>
-						<Box w="100%">
-							<Text fontSize="sm" color="gray.600" mb={2}>
-								Call ID
-							</Text>
-							<Input
-								placeholder="Enter call ID"
-								value={callId}
-								onChange={(e) => setCallId(e.target.value)}
-								size="md"
-								borderRadius="md"
-							/>
-						</Box>
+				<Stack direction="column" gap={6} w="100%">
+					{/* Media Controls */}
+					<HStack gap={4} justify="center">
 						<Button
-							onClick={handleJoinCall}
-							colorScheme="blue"
-							w="100%"
-							loading={isJoining}
-							disabled={!callId.trim() || isJoining}
+							onClick={toggleMicrophone}
+							variant="outline"
+							size="md"
+							w="60px"
+							h="60px"
+							borderRadius="full"
+							bg={isMicEnabled ? "blue.500" : "gray.100"}
+							color={isMicEnabled ? "white" : "gray.600"}
+							borderColor={isMicEnabled ? "blue.500" : "gray.300"}
+							_hover={{
+								transform: "scale(1.05)",
+								bg: isMicEnabled ? "blue.600" : "gray.200"
+							}}
+							title={isMicEnabled ? "Mute microphone" : "Unmute microphone"}
 						>
-							{isJoining ? 'Joining...' : 'Join Call'}
+							{isMicEnabled ? <LuMic size={20} /> : <LuMicOff size={20} />}
 						</Button>
-						<Text fontSize="xs" color="gray.500" textAlign="center">
-							Share the same Call ID with others to join the same call
-						</Text>
-					</Stack>
-				)}
+						
+						<Button
+							onClick={toggleCamera}
+							variant="outline"
+							size="md"
+							w="60px"
+							h="60px"
+							borderRadius="full"
+							bg={isCameraEnabled ? "blue.500" : "gray.100"}
+							color={isCameraEnabled ? "white" : "gray.600"}
+							borderColor={isCameraEnabled ? "blue.500" : "gray.300"}
+							_hover={{
+								transform: "scale(1.05)",
+								bg: isCameraEnabled ? "blue.600" : "gray.200"
+							}}
+							title={isCameraEnabled ? "Turn off camera" : "Turn on camera"}
+						>
+							{isCameraEnabled ? <LuVideo size={20} /> : <LuVideoOff size={20} />}
+						</Button>
+					</HStack>
+
+					<Button
+						onClick={handleJoinCall}
+						colorScheme="blue"
+						w="100%"
+						loading={isJoining || !isConnected}
+						disabled={isJoining || !isConnected}
+						size="lg"
+						borderRadius="lg"
+					>
+						{isJoining ? 'Joining...' : !isConnected ? 'Connecting...' : 'Join Video Call'}
+					</Button>
+				</Stack>
 			</Stack>
 		</Box>
 	)
