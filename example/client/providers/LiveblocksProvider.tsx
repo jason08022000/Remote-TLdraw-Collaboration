@@ -1,31 +1,12 @@
 import { LiveblocksProvider as Provider } from "@liveblocks/react";
-import { PropsWithChildren, useCallback, useRef } from "react";
+import { PropsWithChildren, useCallback } from "react";
+import { useUser } from "../contexts/UserContext";
 
 export function LiveblocksProvider({ children }: PropsWithChildren) {
-  const userIdRef = useRef<string | null>(null);
+  const { userId } = useUser();
 
   const authEndpoint = useCallback(async (room?: string) => {
-    // Get or create a stable user ID
-    if (!userIdRef.current) {
-      const storageKey = 'tldraw-user-session';
-      const stored = sessionStorage.getItem(storageKey);
-      
-      if (stored) {
-        const user = JSON.parse(stored);
-        userIdRef.current = user.id;
-      } else {
-        const userId = `user-${Math.random().toString(36).substr(2, 9)}`;
-        const newUser = {
-          id: userId,
-          color: '#4299E1',
-          name: `User ${userId.slice(-3).toUpperCase()}`,
-        };
-        sessionStorage.setItem(storageKey, JSON.stringify(newUser));
-        userIdRef.current = userId;
-      }
-    }
-
-    console.log("Auth request for user:", userIdRef.current);
+    console.log("Auth request for user:", userId);
 
     try {
       const response = await fetch("/api/liveblocks/auth", {
@@ -33,7 +14,7 @@ export function LiveblocksProvider({ children }: PropsWithChildren) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: userIdRef.current }),
+        body: JSON.stringify({ userId }),
       });
 
       if (!response.ok) {
@@ -43,13 +24,13 @@ export function LiveblocksProvider({ children }: PropsWithChildren) {
       }
 
       const data = await response.json() as { token: string };
-      console.log("Auth successful for user:", userIdRef.current);
+      console.log("Auth successful for user:", userId);
       return { token: data.token };
     } catch (error) {
       console.error("Auth error:", error);
       throw error;
     }
-  }, []);
+  }, [userId]);
 
   return (
     <Provider 

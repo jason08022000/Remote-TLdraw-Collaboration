@@ -9,8 +9,11 @@ import {
 import { CollaborationPanel } from './features/collaboration'
 import { TldrawCanvas } from './features/tldraw'
 import { Room } from './providers/Room'
+import { NameInput } from './components/NameInput'
+import { useUser } from './contexts/UserContext'
 
 function App() {
+	const { hasSetName } = useUser()
 	const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
 	const [splitPercentage, setSplitPercentage] = useState(50) // 50% split by default
 	const [isDragging, setIsDragging] = useState(false)
@@ -65,6 +68,11 @@ function App() {
 	const bgColor = 'gray.50'
 	const toggleBg = 'white'
 	const borderColor = 'gray.200'
+
+	// Show name input if user hasn't set their name yet
+	if (!hasSetName) {
+		return <NameInput />
+	}
 
 	return (
 		<Flex h="100vh" w="100vw" position="fixed" inset={0} bg={bgColor} ref={containerRef}>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
 	Box,
 	Button,
@@ -15,6 +15,7 @@ import {
 	StreamTheme,
 } from '@stream-io/video-react-sdk'
 import { useVideo } from './VideoProvider'
+import { useUser } from '../../contexts/UserContext'
 
 // Import Stream Video CSS for beautiful UI
 import '@stream-io/video-react-sdk/dist/css/styles.css'
@@ -31,7 +32,7 @@ const isWebRTCSupported = (): boolean => {
 
 export function VideoCall() {
 	const { client, isConnected, connectUser } = useVideo()
-	const [userName, setUserName] = useState('')
+	const { userName } = useUser()
 	const [callId, setCallId] = useState('')
 	const [activeCall, setActiveCall] = useState<Call | null>(null)
 	const [isJoining, setIsJoining] = useState(false)
@@ -40,6 +41,24 @@ export function VideoCall() {
 	useEffect(() => {
 		setWebRTCSupported(isWebRTCSupported())
 	}, [])
+
+	const handleConnect = useCallback(async () => {
+		try {
+			setIsJoining(true)
+			await connectUser(userName)
+		} catch (error) {
+			console.error('Failed to connect:', error)
+		} finally {
+			setIsJoining(false)
+		}
+	}, [userName, connectUser])
+
+	// Auto-connect to Stream when component mounts
+	useEffect(() => {
+		if (!isConnected && userName && !isJoining) {
+			handleConnect()
+		}
+	}, [userName, isConnected, isJoining, handleConnect])
 
 	// Auto-clear activeCall when call ends (not just when user clicks leave)
 	useEffect(() => {
@@ -57,19 +76,6 @@ export function VideoCall() {
 			activeCall.off('call.ended', handleCallEnd)
 		}
 	}, [activeCall])
-
-	const handleConnect = async () => {
-		if (!userName.trim()) return
-
-		try {
-			setIsJoining(true)
-			await connectUser(userName.trim())
-		} catch (error) {
-			console.error('Failed to connect:', error)
-		} finally {
-			setIsJoining(false)
-		}
-	}
 
 	const handleJoinCall = async () => {
 		if (!client || !callId.trim()) return
@@ -172,32 +178,26 @@ export function VideoCall() {
 
 				{!isConnected ? (
 					<Stack direction="column" gap={4} w="100%">
-						<Box w="100%">
-							<Text fontSize="sm" color="gray.600" mb={2}>
-								Your Name
+						<Box w="100%" p={4} bg="blue.50" borderRadius="md" borderColor="blue.200" border="1px solid">
+							<Text fontSize="sm" color="blue.600" mb={1} fontWeight="medium">
+								Welcome, {userName}!
 							</Text>
-							<Input
-								placeholder="Enter your name"
-								value={userName}
-								onChange={(e) => setUserName(e.target.value)}
-								size="md"
-								borderRadius="md"
-							/>
+							<Text fontSize="xs" color="blue.500">
+								{isJoining ? 'Connecting to video service...' : 'Setting up video calling'}
+							</Text>
 						</Box>
-						<Button
-							onClick={handleConnect}
-							colorScheme="blue"
-							w="100%"
-							loading={isJoining}
-							disabled={!userName.trim() || isJoining}
-						>
-							{isJoining ? 'Connecting...' : 'Connect'}
-						</Button>
+						{isJoining && (
+							<Box textAlign="center" py={2}>
+								<Text fontSize="sm" color="gray.500">
+									Connecting...
+								</Text>
+							</Box>
+						)}
 					</Stack>
 				) : (
 					<Stack direction="column" gap={4} w="100%">
 						<Text fontSize="sm" color="green.600" fontWeight="medium">
-							Connected
+							Connected as {userName}
 						</Text>
 						<Box w="100%">
 							<Text fontSize="sm" color="gray.600" mb={2}>
