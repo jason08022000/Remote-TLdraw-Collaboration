@@ -181,11 +181,33 @@ const SimpleThinkEvent = z.object({
 })
 export type ISimpleThinkEvent = z.infer<typeof SimpleThinkEvent>
 
+const SimpleLinearDiagramEvent = z.object({
+	type: z.literal('create_linear_diagram'),
+	description: z.string(),
+	steps: z.array(z.object({
+		id: z.string(),
+		title: z.string(),
+		description: z.string().optional(),
+		color: SimpleColor.optional(),
+	})),
+	direction: z.enum(['horizontal', 'vertical']),
+	startPosition: z.object({
+		x: z.number(),
+		y: z.number(),
+	}),
+	boxWidth: z.number().optional(),
+	boxHeight: z.number().optional(),
+	spacing: z.number().optional(),
+	intent: z.string(),
+})
+export type ISimpleLinearDiagramEvent = z.infer<typeof SimpleLinearDiagramEvent>
+
 export const SimpleEvent = z.union([
 	SimpleThinkEvent,
 	SimpleCreateEvent, // or update
 	SimpleDeleteEvent,
 	SimpleMoveEvent,
+	SimpleLinearDiagramEvent,
 ])
 
 export type ISimpleEvent = z.infer<typeof SimpleEvent>

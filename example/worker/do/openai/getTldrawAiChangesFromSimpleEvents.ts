@@ -1,6 +1,7 @@
 import {
 	TLAiChange,
 	TLAiCreateBindingChange,
+	TLAiCreateLinearDiagramChange,
 	TLAiCreateShapeChange,
 	TLAiSerializedPrompt,
 	TLAiUpdateShapeChange,
@@ -22,6 +23,7 @@ import {
 	ISimpleDeleteEvent,
 	ISimpleEvent,
 	ISimpleFill,
+	ISimpleLinearDiagramEvent,
 	ISimpleMoveEvent,
 } from './schema'
 
@@ -39,6 +41,9 @@ export function getTldrawAiChangesFromSimpleEvents(
 		}
 		case 'move': {
 			return getTldrawAiChangesFromSimpleMoveEvent(prompt, event)
+		}
+		case 'create_linear_diagram': {
+			return getTldrawAiChangesFromSimpleLinearDiagramEvent(prompt, event)
 		}
 		case 'think': {
 			return []
@@ -302,4 +307,32 @@ function getTldrawAiChangesFromSimpleMoveEvent(
 			},
 		},
 	]
+}
+
+function getTldrawAiChangesFromSimpleLinearDiagramEvent(
+	prompt: TLAiSerializedPrompt,
+	event: ISimpleLinearDiagramEvent
+): TLAiChange[] {
+	const { description, steps, direction, startPosition, boxWidth, boxHeight, spacing, intent } = event
+
+	const change: TLAiCreateLinearDiagramChange = {
+		type: 'createLinearDiagram',
+		description: description || intent,
+		steps: steps.map(step => ({
+			id: step.id,
+			title: step.title,
+			description: step.description,
+			color: step.color,
+		})),
+		direction,
+		startPosition,
+		metadata: {
+			step_count: steps.length,
+			boxWidth,
+			boxHeight,
+			spacing,
+		},
+	}
+
+	return [change]
 }

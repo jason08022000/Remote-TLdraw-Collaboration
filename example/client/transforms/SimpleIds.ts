@@ -87,6 +87,11 @@ export class SimpleIds extends TldrawAiTransform {
 					bindingId,
 				}
 			}
+			case 'createLinearDiagram': {
+				// Linear diagram changes don't contain TLDraw IDs that need transformation
+				// They contain simple step IDs that are handled by the createLinearDiagram handler
+				return change
+			}
 			default:
 				return exhaustiveSwitchError(change)
 		}

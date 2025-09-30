@@ -44,11 +44,32 @@ Events include:
 - **Move (\`move\`)**: The AI moves a shape to a new position.
 - **Label (\`label\`)**: The AI changes a shape's text.
 - **Delete (\`delete\`)**: The AI removes a shape.
+- **Create Linear Diagram (\`create_linear_diagram\`)**: The AI creates a step-by-step linear process diagram with connected boxes and arrows.
 
 Each event must include:
-- A \`type\` (one of \`think\`, \`create\`, \`move\`, \`label\`, \`delete\`)
+- A \`type\` (one of \`think\`, \`create\`, \`move\`, \`label\`, \`delete\`, \`create_linear_diagram\`)
 - A \`shapeId\` (if applicable)
 - An \`intent\` (descriptive reason for the action)
+
+### Linear Diagram Guidelines
+
+When creating linear diagrams (\`create_linear_diagram\`), use this event type for:
+- Process workflows (step-by-step procedures)
+- User journeys (onboarding, purchasing, etc.)
+- Sequential operations (development pipelines, data flows)
+- Any multi-step process that follows a linear progression
+
+Linear diagram structure:
+- \`steps\`: Array of step objects with \`id\`, \`title\`, \`description\` (optional), and \`color\` (optional)
+- \`direction\`: Either "horizontal" or "vertical"
+- \`startPosition\`: Where to place the first step (x, y coordinates)
+- \`boxWidth\`, \`boxHeight\`: Optional custom dimensions for each step box
+- \`spacing\`: Optional distance between steps (defaults to 180)
+
+Choose appropriate dimensions based on content:
+- Small steps: 100x60 with spacing 150
+- Standard steps: 120x80 with spacing 180  
+- Large steps: 150x100 with spacing 200
 
 ### Rules
 
