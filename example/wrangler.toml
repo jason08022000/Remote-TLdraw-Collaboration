@@ -3,19 +3,27 @@ main = "worker/worker.ts"
 compatibility_date = "2025-03-10"
 compatibility_flags = ["nodejs_compat"]
 upload_source_maps = true
-account_id = "d18d2804fcada0285bb3f0e5ff7a2f08"
+account_id = "53e5de7ce327a13dc2f9f81739a9c4f5"
+
+# Environment variables for OpenAI integration
+[env.development.vars]
+LOG_LEVEL = "debug"
+
+[env.production.vars]
+LOG_LEVEL = "none"
 
 [assets]
 not_found_handling = "single-page-application"
-directory = "./example/client"
+directory = "./client"
 
 [observability]
 enabled = true
 
-# Set up the durable object used for each tldraw room
+# Set up the durable objects used for tldraw rooms and AI processing
 [durable_objects]
 bindings = [
     { name = "TLDRAW_DURABLE_OBJECT", class_name = "TldrawDurableObject" },
+    { name = "TLDRAW_AI_DURABLE_OBJECT", class_name = "TldrawAiDurableObject" },
 ]
 
 [[routes]]
@@ -27,8 +35,12 @@ custom_domain = true
 tag = "v1"
 new_sqlite_classes  = ["TldrawDurableObject"]
 
-# We store rooms and asset uploads in an R2 bucket
-[[r2_buckets]]
-binding = 'TLDRAW_BUCKET'
-bucket_name = 'remote-tldraw-collaboration'
-preview_bucket_name = 'multiplayer-template-preview'
+[[migrations]]
+tag = "v2"
+new_sqlite_classes  = ["TldrawAiDurableObject"]
+
+# R2 bucket commented out - not needed for AI functionality
+# [[r2_buckets]]
+# binding = 'TLDRAW_BUCKET'
+# bucket_name = 'remote-tldraw-collaboration'
+# preview_bucket_name = 'multiplayer-template-preview'

@@ -24,5 +24,6 @@ export default class extends WorkerEntrypoint<Environment> {
 	}
 }
 
-// Make the durable object available to the cloudflare worker
+// Make the durable objects available to the cloudflare worker
 export { TldrawAiDurableObject } from './do/TldrawAiDurableObject'
+export { TldrawDurableObject } from '../../worker/TldrawDurableObject'

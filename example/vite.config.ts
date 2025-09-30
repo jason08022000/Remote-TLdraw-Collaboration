@@ -12,6 +12,16 @@ export default defineConfig(({ mode }) => {
 					target: 'http://localhost:3001',
 					changeOrigin: true,
 					secure: false,
+				},
+				'/generate': {
+					target: 'http://localhost:8787',
+					changeOrigin: true,
+					secure: false,
+				},
+				'/stream': {
+					target: 'http://localhost:8787',
+					changeOrigin: true,
+					secure: false,
 				}
 			}
 		}
