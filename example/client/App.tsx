@@ -10,7 +10,11 @@ import { CollaborationPanel } from './features/collaboration'
 import { TldrawCanvas } from './features/tldraw'
 import { Room } from './providers/Room'
 import { NameInput } from './components/NameInput'
+import { ConnectionStatus } from './components/ConnectionStatus'
 import { useUser } from './contexts/UserContext'
+import { useWebSocket } from './hooks/useWebSocket'
+
+const WEBSOCKET_URL = 'ws://127.0.0.1:8799'
 
 function App() {
 	const { hasSetDetails, roomId, userName, resetUserDetails } = useUser()
@@ -18,6 +22,9 @@ function App() {
 	const [splitPercentage, setSplitPercentage] = useState(50) // 50% split by default
 	const [isDragging, setIsDragging] = useState(false)
 	const containerRef = useRef<HTMLDivElement>(null)
+	
+	// WebSocket connection for transcription
+	const { isConnected, messages, reconnect } = useWebSocket(WEBSOCKET_URL)
 	
 	const toggleCanvas = () => {
 		setIsCanvasCollapsed(!isCanvasCollapsed)
@@ -76,6 +83,9 @@ function App() {
 
 	return (
 		<Flex h="100vh" w="100vw" position="fixed" inset={0} bg={bgColor} ref={containerRef}>
+			{/* WebSocket Connection Status */}
+			<ConnectionStatus isConnected={isConnected} onReconnect={reconnect} />
+			
 			{/* Left Panel - Collaboration */}
 			<Box 
 				w={isCanvasCollapsed ? "100%" : `${splitPercentage}%`}
