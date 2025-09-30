@@ -35,7 +35,12 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 					],
 					direction: 'horizontal',
 					startPosition: { x: 100, y: 200 },
-					metadata: { step_count: 4, spacing: 180 }
+					metadata: { 
+						step_count: 4, 
+						spacing: 180,
+						boxWidth: 140,
+						boxHeight: 90
+					}
 				}
 				break
 
@@ -50,8 +55,13 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 						{ id: '2step4', title: 'Deploy', color: 'green' }
 					],
 					direction: 'horizontal',
-					startPosition: { x: 100, y: 300 },
-					metadata: { step_count: 4, spacing: 160 }
+					startPosition: { x: 100, y: 350 },
+					metadata: { 
+						step_count: 4, 
+						spacing: 160,
+						boxWidth: 100,
+						boxHeight: 70
+					}
 				}
 				break
 
@@ -67,8 +77,13 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 						{ id: '3step5', title: 'Confirmation', color: 'green' }
 					],
 					direction: 'horizontal',
-					startPosition: { x: 50, y: 400 },
-					metadata: { step_count: 5, spacing: 150 }
+					startPosition: { x: 50, y: 500 },
+					metadata: { 
+						step_count: 5, 
+						spacing: 150,
+						boxWidth: 130,
+						boxHeight: 60
+					}
 				}
 				break
 

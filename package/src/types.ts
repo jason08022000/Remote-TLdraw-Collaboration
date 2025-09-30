@@ -104,6 +104,8 @@ export interface TLAiCreateLinearDiagramChange {
 	metadata?: {
 		step_count: number
 		spacing?: number
+		boxWidth?: number
+		boxHeight?: number
 	}
 }
 

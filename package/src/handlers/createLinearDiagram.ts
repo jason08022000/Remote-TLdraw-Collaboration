@@ -12,9 +12,9 @@ export function createLinearDiagram(
 ): void {
 	const { steps, direction, startPosition, metadata } = change
 	
-	// Configuration
-	const boxWidth = 120
-	const boxHeight = 80
+	// Configuration - AI can specify sizes, with sensible defaults
+	const boxWidth = metadata?.boxWidth || 120
+	const boxHeight = metadata?.boxHeight || 80
 	const spacing = metadata?.spacing || 180
 	
 	// Track created shape IDs for connecting with arrows
