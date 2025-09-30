@@ -23,6 +23,8 @@ export function useWebSocket(url: string): UseWebSocketReturn {
   const ws = useRef<WebSocket | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const reconnectAttempts = useRef(0)
+  const messageQueue = useRef<TranscriptionMessage[]>([])
+  const queueProcessorRef = useRef<NodeJS.Timeout | null>(null)
   
   const maxReconnectAttempts = 10
   const baseDelay = 1000 // 1 second
@@ -32,6 +34,37 @@ export function useWebSocket(url: string): UseWebSocketReturn {
     const delay = baseDelay * Math.pow(2, reconnectAttempts.current)
     return Math.min(delay, 60000)
   }
+
+  const processQueue = useCallback(() => {
+    if (messageQueue.current.length === 0) return
+
+    // Process all messages in the queue
+    const messagesToProcess = [...messageQueue.current]
+    messageQueue.current = [] // Clear the queue
+
+    messagesToProcess.forEach(message => {
+      console.log('Processing queued message:', message)
+      // TODO: Add ai.prompt() processing here later
+    })
+
+    // Update the messages state for display
+    setMessages(prev => [...prev, ...messagesToProcess])
+  }, [])
+
+  const startQueueProcessor = useCallback(() => {
+    if (queueProcessorRef.current) return
+    
+    queueProcessorRef.current = setInterval(processQueue, 1000) // Check every 1 seconds
+    console.log('Queue processor started')
+  }, [processQueue])
+
+  const stopQueueProcessor = useCallback(() => {
+    if (queueProcessorRef.current) {
+      clearInterval(queueProcessorRef.current)
+      queueProcessorRef.current = null
+      console.log('Queue processor stopped')
+    }
+  }, [])
 
   const connect = useCallback(() => {
     if (ws.current?.readyState === WebSocket.OPEN) {
@@ -45,13 +78,14 @@ export function useWebSocket(url: string): UseWebSocketReturn {
         console.log('WebSocket connected to:', url)
         setIsConnected(true)
         reconnectAttempts.current = 0
+        startQueueProcessor()
       }
       
       ws.current.onmessage = (event) => {
         try {
           const message: TranscriptionMessage = JSON.parse(event.data)
-          console.log('Received transcription:', message)
-          setMessages(prev => [...prev, message])
+          // Add to queue instead of immediate processing
+          messageQueue.current.push(message)
         } catch (error) {
           console.error('Failed to parse WebSocket message:', error)
         }
@@ -60,6 +94,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
       ws.current.onclose = (event) => {
         console.log('WebSocket disconnected:', event.code, event.reason)
         setIsConnected(false)
+        stopQueueProcessor()
         
         // Only attempt reconnection if it wasn't a clean close and we haven't exceeded max attempts
         if (event.code !== 1000 && reconnectAttempts.current < maxReconnectAttempts) {
@@ -84,7 +119,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
       console.error('Failed to create WebSocket connection:', error)
       setIsConnected(false)
     }
-  }, [url])
+  }, [url, startQueueProcessor, stopQueueProcessor])
 
   const reconnect = useCallback(() => {
     reconnectAttempts.current = 0
@@ -98,6 +133,8 @@ export function useWebSocket(url: string): UseWebSocketReturn {
     connect()
     
     return () => {
+      stopQueueProcessor()
+      
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current)
       }
@@ -106,7 +143,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
         ws.current.close(1000, 'Component unmounting')
       }
     }
-  }, [connect])
+  }, [connect, stopQueueProcessor])
 
   return {
     isConnected,
