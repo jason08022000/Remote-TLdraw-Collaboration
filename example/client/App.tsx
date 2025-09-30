@@ -8,8 +8,12 @@ import {
 } from '@chakra-ui/react'
 import { CollaborationPanel } from './features/collaboration'
 import { TldrawCanvas } from './features/tldraw'
+import { Room } from './providers/Room'
+import { NameInput } from './components/NameInput'
+import { useUser } from './contexts/UserContext'
 
 function App() {
+	const { hasSetDetails, roomId, userName, resetUserDetails } = useUser()
 	const [isCanvasCollapsed, setIsCanvasCollapsed] = useState(false)
 	const [splitPercentage, setSplitPercentage] = useState(50) // 50% split by default
 	const [isDragging, setIsDragging] = useState(false)
@@ -64,6 +68,11 @@ function App() {
 	const bgColor = 'gray.50'
 	const toggleBg = 'white'
 	const borderColor = 'gray.200'
+
+	// Show name input if user hasn't set their details yet
+	if (!hasSetDetails) {
+		return <NameInput />
+	}
 
 	return (
 		<Flex h="100vh" w="100vw" position="fixed" inset={0} bg={bgColor} ref={containerRef}>
@@ -125,14 +134,16 @@ function App() {
 			)}
 
 			{/* Right Panel - TLdraw Canvas */}
-			<Box 
-				w={isCanvasCollapsed ? "0" : `${100 - splitPercentage}%`}
-				transition={isDragging ? "none" : "width 0.3s ease"}
-				overflow="hidden"
-				position="relative"
-			>
-				<TldrawCanvas isVisible={!isCanvasCollapsed} />
-			</Box>
+			<Room roomId={roomId}>
+				<Box 
+					w={isCanvasCollapsed ? "0" : `${100 - splitPercentage}%`}
+					transition={isDragging ? "none" : "width 0.3s ease"}
+					overflow="hidden"
+					position="relative"
+				>
+					<TldrawCanvas isVisible={!isCanvasCollapsed} />
+				</Box>
+			</Room>
 
 			{/* Status Bar */}
 			<Box
@@ -148,8 +159,29 @@ function App() {
 				transition={isDragging ? "none" : "right 0.3s ease"}
 			>
 				<HStack h="100%" justify="space-between" fontSize="xs" color="gray.500">
-					<Text>Ready</Text>
 					<HStack gap={3}>
+						<Text>Ready</Text>
+						<Text>•</Text>
+						<Text>{userName} in {roomId}</Text>
+					</HStack>
+					<HStack gap={3}>
+						<Button
+							size="xs"
+							variant="ghost"
+							color="gray.600"
+							fontSize="xs"
+							h="16px"
+							minW="auto"
+							px={2}
+							onClick={resetUserDetails}
+							_hover={{
+								bg: "gray.200",
+								color: "gray.800"
+							}}
+						>
+							Change Details
+						</Button>
+						<Text>•</Text>
 						<Text>Collaboration</Text>
 						{!isCanvasCollapsed && <Text>•</Text>}
 						{!isCanvasCollapsed && <Text>Canvas</Text>}

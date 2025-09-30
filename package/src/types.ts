@@ -90,6 +90,23 @@ export interface TLAiDeleteBindingChange {
 	bindingId: TLBindingId
 }
 
+export interface TLAiCreateLinearDiagramChange {
+	type: 'createLinearDiagram'
+	description: string
+	steps: Array<{
+		id: string
+		title: string
+		description?: string
+		color?: string
+	}>
+	direction: 'horizontal' | 'vertical'
+	startPosition: { x: number; y: number }
+	metadata?: {
+		step_count: number
+		spacing?: number
+	}
+}
+
 /**
  * A generated change that can be applied to the editor.
  */
@@ -100,6 +117,7 @@ export type TLAiChange =
 	| TLAiCreateBindingChange
 	| TLAiUpdateBindingChange
 	| TLAiDeleteBindingChange
+	| TLAiCreateLinearDiagramChange
 
 export type TLAiContent = Omit<TLContent, 'schema' | 'rootShapeIds'> & {
 	bindings: TLBinding[]

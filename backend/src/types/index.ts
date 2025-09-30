@@ -26,4 +26,18 @@ export interface Environment {
   PORT: number;
   STREAM_API_KEY: string;
   STREAM_API_SECRET: string;
+  LIVEBLOCKS_SECRET_KEY: string;
+}
+
+export interface LiveblocksAuthRequest {
+  userId: string;
+}
+
+export interface LiveblocksUser {
+  id: string;
+  info: {
+    name: string;
+    color: string;
+    avatar: string;
+  };
 }

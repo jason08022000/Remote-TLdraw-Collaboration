@@ -6,5 +6,24 @@ import { defineConfig } from 'vite'
 export default defineConfig(({ mode }) => {
 	return {
 		plugins: [cloudflare(), react()],
+		server: {
+			proxy: {
+				'/api': {
+					target: 'http://localhost:3001',
+					changeOrigin: true,
+					secure: false,
+				},
+				'/generate': {
+					target: 'http://localhost:8787',
+					changeOrigin: true,
+					secure: false,
+				},
+				'/stream': {
+					target: 'http://localhost:8787',
+					changeOrigin: true,
+					secure: false,
+				}
+			}
+		}
 	}
 })

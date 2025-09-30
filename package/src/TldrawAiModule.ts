@@ -2,6 +2,7 @@ import { Box, Editor, FileHelpers, TLShapePartial } from 'tldraw'
 import { TldrawAiTransformConstructor } from './TldrawAiTransform'
 import { TLAiChange, TLAiContent, TLAiMessages, TLAiPrompt } from './types'
 import { asMessage, exhaustiveSwitchError } from './utils'
+import { createLinearDiagram } from './handlers/createLinearDiagram'
 
 export interface TldrawAiModuleOptions {
 	editor: Editor
@@ -97,6 +98,10 @@ export class TldrawAiModule {
 				}
 				case 'deleteBinding': {
 					editor.deleteBinding(change.bindingId)
+					break
+				}
+				case 'createLinearDiagram': {
+					createLinearDiagram(editor, change)
 					break
 				}
 				default:
