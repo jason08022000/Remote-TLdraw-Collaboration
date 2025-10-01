@@ -151,7 +151,10 @@ function App() {
 					overflow="hidden"
 					position="relative"
 				>
-					<TldrawCanvas isVisible={!isCanvasCollapsed} />
+					<TldrawCanvas 
+						isVisible={!isCanvasCollapsed} 
+						webSocketMessages={messages}
+					/>
 				</Box>
 			</Room>
 
