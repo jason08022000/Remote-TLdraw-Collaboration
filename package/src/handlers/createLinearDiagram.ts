@@ -12,10 +12,13 @@ export function createLinearDiagram(
 ): void {
 	const { steps, direction, startPosition, metadata } = change
 	
+	// Generate unique batch ID to avoid shape ID conflicts between diagrams
+	const batchId = `${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+	
 	// Configuration - AI can specify sizes, with sensible defaults
 	const boxWidth = metadata?.boxWidth || 120
 	const boxHeight = metadata?.boxHeight || 80
-	const spacing = metadata?.spacing || 180
+	const spacing = metadata?.spacing || 360
 	
 	// Track created shape IDs for connecting with arrows
 	const shapeIds: TLShapeId[] = []
@@ -32,7 +35,7 @@ export function createLinearDiagram(
 			y = startPosition.y + (index * spacing)
 		}
 		
-		const shapeId = `shape:linear-step-${step.id}` as TLShapeId
+		const shapeId = `shape:linear-step-${batchId}-${step.id}` as TLShapeId
 		
 		editor.createShape({
 			id: shapeId,
@@ -76,7 +79,7 @@ export function createLinearDiagram(
 		}
 		
 		editor.createShape({
-			id: `shape:linear-arrow-${fromStepId}-${toStepId}` as TLShapeId,
+			id: `shape:linear-arrow-${batchId}-${fromStepId}-${toStepId}` as TLShapeId,
 			type: 'arrow',
 			x: 0,
 			y: 0,
