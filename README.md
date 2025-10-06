@@ -145,3 +145,6 @@ pnpm run dev
 
 Navigate to **http://localhost:5173** in your browser.
 
+### 7. Run Python Transcript Service
+
+Refer to https://github.com/naruto716/705py for details
