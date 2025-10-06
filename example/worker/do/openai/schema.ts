@@ -202,12 +202,47 @@ const SimpleLinearDiagramEvent = z.object({
 })
 export type ISimpleLinearDiagramEvent = z.infer<typeof SimpleLinearDiagramEvent>
 
+// Table Event
+const SimpleTableEvent = z.object({
+	type: z.literal('create_table'),
+	description: z.string(),
+	rows: z.array(
+		z.object({
+			id: z.string(),
+			cells: z.array(
+				z.object({
+					id: z.string(),
+					content: z.string(),
+					colspan: z.number().optional(),
+					rowspan: z.number().optional(),
+					align: z.enum(['left', 'center', 'right']).optional(),
+					color: SimpleColor.optional(),
+				})
+			),
+		})
+	),
+	layout: z.literal('grid'),
+	startPosition: z.object({
+		x: z.number(),
+		y: z.number(),
+	}),
+	rowHeight: z.number().optional(),
+	colWidth: z.number().optional(),
+	borderColor: SimpleColor.optional(),
+	borderWidth: z.number().optional(),
+	spacing: z.number().optional(),
+	intent: z.string(),
+})
+
+export type ISimpleTableEvent = z.infer<typeof SimpleTableEvent>
+
 export const SimpleEvent = z.union([
 	SimpleThinkEvent,
 	SimpleCreateEvent, // or update
 	SimpleDeleteEvent,
 	SimpleMoveEvent,
 	SimpleLinearDiagramEvent,
+	SimpleTableEvent,
 ])
 
 export type ISimpleEvent = z.infer<typeof SimpleEvent>

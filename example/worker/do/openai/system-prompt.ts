@@ -45,6 +45,7 @@ Events include:
 - **Label (\`label\`)**: The AI changes a shape's text.
 - **Delete (\`delete\`)**: The AI removes a shape.
 - **Create Linear Diagram (\`create_linear_diagram\`)**: The AI creates a step-by-step linear process diagram with connected boxes and arrows.
+- **Create Table (\`create_table\`)**: The AI creates a tabular layout containing rows and cells.
 
 Each event must include:
 - A \`type\` (one of \`think\`, \`create\`, \`move\`, \`label\`, \`delete\`, \`create_linear_diagram\`)
@@ -153,4 +154,71 @@ Assistant: {
 		}
 	]
 }
+
+### Table Creation Guidelines
+
+When creating a ** table ** (\`create_table\`), use this event type for:
+- Visualizing structured data in rows and columns (e.g., schedules, reports, comparisons)
+- Representing data entities (e.g., patients, students, transactions)
+- Creating grid-like forms for input or display purposes
+
+**Table Structure:**
+- \`rows\`: Array of row objects
+  - Each row has an \`id\` and a list of \`cells\`
+  - Each cell includes:
+    - \`id\`: Unique identifier
+    - \`content\`: The cell text or label
+    - \`colspan\` / \`rowspan\` (optional): Merge cells horizontally or vertically
+    - \`align\`: "left", "center", or "right" (optional)
+    - \`color\`: Optional color for highlighting
+- \`layout\`: Always "grid"
+- \`startPosition\`: Coordinates (\`x\`, \`y\`) for the top-left corner of the table
+- \`metadata\`: Optional formatting configuration
+  - \`rowHeight\`, \`colWidth\`: Control table size
+  - \`borderColor\`, \`borderWidth\`: Define grid styling
+  - \`spacing\`: Gap between cells
+
+**Best Practices:**
+- Keep row and cell counts small (e.g., 3–6 columns, 3–10 rows) for readability.
+- Use short and meaningful \`content\` labels.
+- Prefer consistent column widths unless specific merging or alignment is required.
+- Ensure all cells are defined for each row (avoid missing cells).
+
+**Example Table Event:**
+\`\`\`json
+{
+  "type": "create_table",
+  "description": "Generate a hospital staff schedule table",
+  "rows": [
+    {
+      "id": "r1",
+      "cells": [
+        { "id": "c1", "content": "Doctor", "align": "center" },
+        { "id": "c2", "content": "Shift Time" },
+        { "id": "c3", "content": "Ward" }
+      ]
+    },
+    {
+      "id": "r2",
+      "cells": [
+        { "id": "c4", "content": "Dr. Smith" },
+        { "id": "c5", "content": "08:00 - 16:00" },
+        { "id": "c6", "content": "Cardiology" }
+      ]
+    }
+  ],
+  "layout": "grid",
+  "startPosition": { "x": 200, "y": 150 },
+  "rowHeight": 40,
+  "colWidth": 150,
+  "borderColor": "black",
+  "borderWidth": 1,
+  "intent": "Visualize doctor shift allocations"
+}
+\`\`\`
+
+Each event must include:
+- A \`type\` (one of \`think\`, \`create\`, \`move\`, \`label\`, \`delete\`, \`create_table\`)
+- An \`intent\` (descriptive reason for the action)
+
 `

@@ -70,6 +70,16 @@ export class SimpleCoordinates extends TldrawAiTransform {
 				}
 				return transformedChange
 			}
+			case 'createTable': {
+				const transformedChange = {
+					...change,
+					startPosition: {
+						x: change.startPosition.x + this.bounds.x,
+						y: change.startPosition.y + this.bounds.y,
+					}
+				}
+				return transformedChange
+			}
 			default: {
 				return change
 			}

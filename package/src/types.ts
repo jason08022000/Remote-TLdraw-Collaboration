@@ -109,6 +109,35 @@ export interface TLAiCreateLinearDiagramChange {
 	}
 }
 
+export interface TLAiCreateTableChange {
+	type: 'createTable'; 
+	description: string; 
+
+	// Table-specific properties
+	rows: Array<{
+		id: string;
+		cells: Array<{
+			id: string;
+			content: string;
+			colspan?: number;
+			rowspan?: number;
+			//align?: 'left' | 'center' | 'right';
+			color?: string;
+		}>;
+	}>;
+
+	layout: 'grid'; 
+	startPosition: { x: number; y: number };
+
+	metadata?: {
+		rowHeight?: number;
+		colWidth?: number;
+		borderColor?: string;
+		borderWidth?: number;
+		spacing?: number;
+	};
+}
+
 /**
  * A generated change that can be applied to the editor.
  */
@@ -120,6 +149,7 @@ export type TLAiChange =
 	| TLAiUpdateBindingChange
 	| TLAiDeleteBindingChange
 	| TLAiCreateLinearDiagramChange
+	| TLAiCreateTableChange
 
 export type TLAiContent = Omit<TLContent, 'schema' | 'rootShapeIds'> & {
 	bindings: TLBinding[]

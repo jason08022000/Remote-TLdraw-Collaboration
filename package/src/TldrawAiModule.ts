@@ -3,6 +3,7 @@ import { TldrawAiTransformConstructor } from './TldrawAiTransform'
 import { TLAiChange, TLAiContent, TLAiMessages, TLAiPrompt } from './types'
 import { asMessage, exhaustiveSwitchError } from './utils'
 import { createLinearDiagram } from './handlers/createLinearDiagram'
+import { createTable } from './handlers/createTable'
 
 export interface TldrawAiModuleOptions {
 	editor: Editor
@@ -102,6 +103,10 @@ export class TldrawAiModule {
 				}
 				case 'createLinearDiagram': {
 					createLinearDiagram(editor, change)
+					break
+				}
+				case 'createTable': {
+					createTable(editor, change)
 					break
 				}
 				default:

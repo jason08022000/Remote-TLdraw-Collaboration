@@ -1,4 +1,4 @@
-import { TLAiChange, TLAiPrompt, TldrawAiTransform } from '@tldraw/ai'
+﻿import { TLAiChange, TLAiPrompt, TldrawAiTransform } from '@tldraw/ai'
 import { createBindingId, createShapeId } from '@tldraw/tlschema'
 import { exhaustiveSwitchError } from '../utils'
 
@@ -90,6 +90,11 @@ export class SimpleIds extends TldrawAiTransform {
 			case 'createLinearDiagram': {
 				// Linear diagram changes don't contain TLDraw IDs that need transformation
 				// They contain simple step IDs that are handled by the createLinearDiagram handler
+				return change
+			}
+			case 'createTable': {
+				// Most compound diagrams don't need ID transformation
+				// since they generate their own shape IDs
 				return change
 			}
 			default:

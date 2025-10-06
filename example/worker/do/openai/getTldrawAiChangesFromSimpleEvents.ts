@@ -2,6 +2,7 @@ import {
 	TLAiChange,
 	TLAiCreateBindingChange,
 	TLAiCreateLinearDiagramChange,
+	TLAiCreateTableChange,
 	TLAiCreateShapeChange,
 	TLAiSerializedPrompt,
 	TLAiUpdateShapeChange,
@@ -24,6 +25,7 @@ import {
 	ISimpleEvent,
 	ISimpleFill,
 	ISimpleLinearDiagramEvent,
+	ISimpleTableEvent,
 	ISimpleMoveEvent,
 } from './schema'
 
@@ -44,6 +46,9 @@ export function getTldrawAiChangesFromSimpleEvents(
 		}
 		case 'create_linear_diagram': {
 			return getTldrawAiChangesFromSimpleLinearDiagramEvent(prompt, event)
+		}
+		case 'create_table': {
+			return getTldrawAiChangesFromSimpleTableEvent(prompt, event)
 		}
 		case 'think': {
 			return []
@@ -330,6 +335,52 @@ function getTldrawAiChangesFromSimpleLinearDiagramEvent(
 			step_count: steps.length,
 			boxWidth,
 			boxHeight,
+			spacing,
+		},
+	}
+
+	return [change]
+}
+
+// ? Conversion function for table events
+function getTldrawAiChangesFromSimpleTableEvent(
+	prompt: TLAiSerializedPrompt,
+	event: ISimpleTableEvent
+): TLAiChange[] {
+	const {
+		description,
+		rows,
+		layout,
+		startPosition,
+		rowHeight,
+		colWidth,
+		borderColor,
+		borderWidth,
+		spacing,
+		intent,
+	} = event
+
+	const change: TLAiCreateTableChange = {
+		type: 'createTable',
+		description: description || intent,
+		rows: rows.map(row => ({
+			id: row.id,
+			cells: row.cells.map(cell => ({
+				id: cell.id,
+				content: cell.content,
+				colspan: cell.colspan,
+				rowspan: cell.rowspan,
+				align: cell.align,
+				color: cell.color,
+			})),
+		})),
+		layout,
+		startPosition,
+		metadata: {
+			rowHeight,
+			colWidth,
+			borderColor,
+			borderWidth,
 			spacing,
 		},
 	}
