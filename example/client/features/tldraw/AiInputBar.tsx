@@ -1,7 +1,6 @@
 import { FormEventHandler, useCallback, useRef, useState, useEffect } from 'react'
 import { 
 	Box, 
-	Flex, 
 	Button, 
 	Input, 
 	Text,
@@ -10,7 +9,9 @@ import {
 import { DefaultSpinner, Editor } from 'tldraw'
 import { useTldrawAiExample } from '../../useTldrawAiExample'
 import { SampleDiagramsMenu } from '../../components/SampleDiagramsMenu'
+import { AiGeneratedDiagramsMenu } from '../../components/AiGeneratedDiagramsMenu'
 import { TranscriptionMessage } from '../../hooks/useWebSocket'
+import { useWebSocketMessages } from '../../contexts/WebSocketMessagesContext'
 
 interface AiInputBarProps {
 	editor: Editor
@@ -19,6 +20,7 @@ interface AiInputBarProps {
 
 export function AiInputBar({ editor, webSocketMessages = [] }: AiInputBarProps) {
 	const ai = useTldrawAiExample(editor)
+	const { addDiagram, updateDiagram } = useWebSocketMessages()
 
 	// The state of the prompt input, either idle or loading with a cancel callback
 	const [isGenerating, setIsGenerating] = useState(false)
@@ -26,61 +28,109 @@ export function AiInputBar({ editor, webSocketMessages = [] }: AiInputBarProps) 
 	// A stashed cancel function that we can call if the user clicks the button while loading
 	const rCancelFn = useRef<(() => void) | null>(null)
 
-	// Track processed WebSocket messages to avoid reprocessing
+	// Track processed WebSocket messages to avoid duplicates in context
 	const processedMessageIds = useRef<Set<string>>(new Set())
 	
-	// Queue for WebSocket messages waiting to be processed
-	const messageQueue = useRef<TranscriptionMessage[]>([])
-	const isProcessingQueue = useRef<boolean>(false)
+	// Track ongoing AI generations
+	const activeGenerations = useRef<Set<string>>(new Set())
 
 	// Put the ai helpers onto the window for debugging
 	useRef(() => {
 		;(window as any).ai = ai
 	})
 
-	// Function to process the message queue
-	const processMessageQueue = useCallback(async () => {
-		if (isProcessingQueue.current || messageQueue.current.length === 0) {
+	// Function to generate diagram and store in buffer without applying
+	const generateToBuffer = useCallback(async (message: TranscriptionMessage) => {
+		const diagramId = `${message.call_id}-${message.emitted_at}`
+		
+		// Prevent duplicate generations
+		if (activeGenerations.current.has(diagramId)) {
 			return
 		}
-
-		isProcessingQueue.current = true
-
-		while (messageQueue.current.length > 0) {
-			const message = messageQueue.current.shift()!
-			
-			try {
-				console.log(`🤖 Processing WebSocket message (${messageQueue.current.length + 1} in queue):`, message.content)
-				setIsGenerating(true)
-
-				const prompt = `Create a linear diagram from this transcription if it describes a process or sequence of steps: "${message.content}"`
-				const { promise, cancel } = ai.prompt({ message: prompt, stream: true })
-				
-				rCancelFn.current = cancel
-				await promise
-				
-				console.log('✅ WebSocket message processing completed')
-			} catch (error) {
-				console.error('❌ WebSocket message processing failed:', error)
-			} finally {
-				setIsGenerating(false)
-				rCancelFn.current = null
-			}
-		}
-
-		isProcessingQueue.current = false
-	}, [ai])
-
-	// Function to add a WebSocket message to the queue
-	const queueWebSocketMessage = useCallback((message: TranscriptionMessage) => {
-		console.log('📥 Queueing WebSocket message:', message.content)
-		messageQueue.current.push(message)
 		
-		// Start processing if not already processing
-		processMessageQueue()
-	}, [processMessageQueue])
+		activeGenerations.current.add(diagramId)
+		
+		try {
+			console.log(`🤖 Generating diagram for buffer: "${message.content}"`)
+			
+			const promptText = `Create a linear diagram from this transcription if it describes a process or sequence of steps: "${message.content}"`
+			
+			// Collect all changes without applying them
+			const collectedChanges: any[] = []
+			
+			// Create a temporary AI module to prepare the prompt
+			const { TldrawAiModule } = await import('@tldraw/ai')
+			const tempAiModule = new TldrawAiModule({ editor })
+			
+			// Get the serialized prompt
+			const { prompt } = await tempAiModule.generate(promptText)
+			const serializedPrompt = {
+				...prompt,
+				promptBounds: prompt.promptBounds.toJson(),
+				contextBounds: prompt.contextBounds.toJson(),
+			}
+			
+			// Manually stream changes from the AI service
+			const res = await fetch('/stream', {
+				method: 'POST',
+				body: JSON.stringify(serializedPrompt),
+				headers: {
+					'Content-Type': 'application/json',
+				}
+			})
 
-	// Check for new WebSocket messages and add them to queue
+			if (!res.body) {
+				throw new Error('No body in response')
+			}
+
+			const reader = res.body.getReader()
+			const decoder = new TextDecoder()
+			let buffer = ''
+
+			while (true) {
+				const { value, done } = await reader.read()
+				if (done) break
+
+				buffer += decoder.decode(value, { stream: true })
+				const events = buffer.split('\n\n')
+				buffer = events.pop() || ''
+
+				for (const event of events) {
+					const match = event.match(/^data: (.+)$/m)
+					if (match) {
+						try {
+							const change = JSON.parse(match[1])
+							// Collect the change instead of applying it
+							collectedChanges.push(change)
+						} catch (err) {
+							console.error('JSON parsing error:', err)
+						}
+					}
+				}
+			}
+			
+			// Only add to buffer if AI actually generated changes
+			if (collectedChanges.length > 0) {
+				// Add to buffer with generated changes
+				addDiagram(message)
+				updateDiagram(diagramId, {
+					changes: collectedChanges,
+					status: 'generated'
+				})
+				
+				console.log(`✅ Diagram generated and buffered (${collectedChanges.length} changes)`)
+			} else {
+				console.log(`⚠️ No diagram generated for: "${message.content}" - skipping buffer`)
+			}
+		} catch (error) {
+			console.error('❌ Failed to generate diagram:', error)
+			// Don't add failed generations to buffer either - they're not useful
+		} finally {
+			activeGenerations.current.delete(diagramId)
+		}
+	}, [editor, addDiagram, updateDiagram])
+
+	// Process new WebSocket messages and generate diagrams in background
 	useEffect(() => {
 		const newMessages = webSocketMessages.filter(msg => {
 			const messageId = `${msg.call_id}-${msg.emitted_at}`
@@ -90,16 +140,16 @@ export function AiInputBar({ editor, webSocketMessages = [] }: AiInputBarProps) 
 		if (newMessages.length > 0) {
 			console.log(`📨 Found ${newMessages.length} new WebSocket messages`)
 			
-			// Mark all new messages as processed and add them to queue
+			// Mark messages as processed and generate diagrams
 			newMessages.forEach(msg => {
 				const messageId = `${msg.call_id}-${msg.emitted_at}`
 				processedMessageIds.current.add(messageId)
 				
-				// Add each message to the processing queue
-				queueWebSocketMessage(msg)
+				// Generate diagram in background
+				generateToBuffer(msg)
 			})
 		}
-	}, [webSocketMessages, queueWebSocketMessage])
+	}, [webSocketMessages, generateToBuffer])
 
 	const handleSubmit = useCallback<FormEventHandler<HTMLFormElement>>(
 		async (e) => {
@@ -110,9 +160,6 @@ export function AiInputBar({ editor, webSocketMessages = [] }: AiInputBarProps) 
 				rCancelFn.current()
 				rCancelFn.current = null
 				setIsGenerating(false)
-				
-				// Also pause queue processing for manual input
-				isProcessingQueue.current = false
 				return
 			}
 
@@ -143,19 +190,13 @@ export function AiInputBar({ editor, webSocketMessages = [] }: AiInputBarProps) 
 				const input = form.querySelector('input[name="input"]') as HTMLInputElement
 				if (input) input.value = ''
 
-				// Resume queue processing after manual input
-				setTimeout(() => processMessageQueue(), 100)
-
 			} catch (e: any) {
 				console.error(e)
 				setIsGenerating(false)
 				rCancelFn.current = null
-				
-				// Resume queue processing even if manual input failed
-				setTimeout(() => processMessageQueue(), 100)
 			}
 		},
-		[ai, processMessageQueue]
+		[ai]
 	)
 
 	const bgColor = 'white'
@@ -172,6 +213,9 @@ export function AiInputBar({ editor, webSocketMessages = [] }: AiInputBarProps) 
 				<HStack gap={3}>
 					{/* Sample Diagrams Menu */}
 					<SampleDiagramsMenu editor={editor} disabled={isGenerating} />
+
+					{/* AI Generated Diagrams Menu */}
+					<AiGeneratedDiagramsMenu editor={editor} disabled={isGenerating} />
 
 					<Input 
 						name="input" 
