@@ -1,344 +1,340 @@
-# tldraw ai module
+# Remote TLDraw Collaboration
 
-This repo is meant to help developers build integrations between tldraw's canvas and AI tools. It contains several resources that can be used to get information out of tldraw (in order to prompt a model) and to create changes in tldraw based on some generated instructions.
+A real-time collaborative whiteboard application built with TLDraw, featuring AI-powered diagram generation, video calling, and multi-user collaboration.
 
-- Join the [Discord channel](https://discord.gg/9PSF2C5KgV)
-- Learn more about the [tldraw SDK](https://tldraw.dev)
+## 🚀 Features
 
-The best way to get started is to clone this repository and experiment with its example project.
+- **Real-time Collaboration**: Multiple users can draw and edit simultaneously using Liveblocks and Yjs
+- **AI-Powered Diagrams**: Generate diagrams and shapes using OpenAI integration
+- **Video Calling**: Built-in video chat powered by Stream Video SDK
+- **Persistent Storage**: Cloudflare Durable Objects for state management
+- **Sample Diagrams**: Pre-built templates for ER diagrams, flowcharts, and more
 
-The module is also distributed as an NPM package, [@tldraw/ai](https://www.npmjs.com/package/@tldraw/ai). It is meant to be used together with the [tldraw SDK](https://www.npmjs.com/package/tldraw).
+## 📁 Project Structure
 
-## Local development
+This is a monorepo with multiple components:
 
-This repository is a pnpm monorepo. It has three parts:
+```
+Remote-TLdraw-Collaboration/
+├── example/
+│   ├── client/          # Frontend React/Vite app
+│   ├── worker/          # Cloudflare Worker (AI & Durable Objects)
+│   └── wrangler.toml    # Cloudflare Worker configuration
+├── backend/             # Node.js token service (Stream/Liveblocks)
+├── package/             # TLDraw AI module package
+└── my-whiteboard/       # Next.js alternative implementation
+```
 
-- `/package` contains the ai module package itself
-- `/example/client` contains the example's frontend (a Vite app)
-- `/example/worker` contains the example's backend (a Cloudflare Worker)
+## 🛠️ Tech Stack
 
-1. Clone this repository.
+- **Frontend**: React, Vite, TLDraw, Chakra UI
+- **Backend**: 
+  - Cloudflare Workers (AI processing)
+  - Cloudflare Durable Objects (state management)
+  - Node.js/Express (token service)
+- **Real-time**: Liveblocks, Yjs
+- **Video**: Stream Video SDK
+- **AI**: OpenAI API
+- **Package Manager**: pnpm
 
-2. Enable `corepack`
+## 📋 Prerequisites
+
+Before you begin, ensure you have:
+
+- **Node.js** (v18 or higher)
+- **pnpm** (v9 or higher)
+- **Git**
+- API Keys for:
+  - [OpenAI](https://platform.openai.com/api-keys)
+  - [Liveblocks](https://liveblocks.io/)
+  - [Stream](https://getstream.io/)
+
+## 🚀 Local Development Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/Remote-TLdraw-Collaboration.git
+cd Remote-TLdraw-Collaboration
+```
+
+### 2. Enable Corepack (for pnpm)
 
 ```bash
 corepack enable
 ```
 
-3. Install dependencies using [pnpm](https://pnpm.io/).
+### 3. Install Dependencies
 
 ```bash
-pnpm i
+pnpm install
 ```
 
-4. Create a `/example/.dev.vars` file. Add any environment variables required by the server to the `/example/.dev.vars` file. By default, our example project requires an [OpenAI API Key](https://platform.openai.com/settings/organization/api-keys) so your `/example/.dev.vars` file should look something like this:
+### 4. Configure Environment Variables
 
-```
-OPENAI_API_KEY=sk-proj-rest-of-your-key
-ANY_OTHER_KEY_YOU_ARE_USING=here
-```
+#### **A. Frontend Environment** (Optional)
 
-If you need to use public-friendly API keys on the frontend, create a `/example/.env` file and put them there. See [this guide](https://vite.dev/guide/env-and-mode) for more information about environment variables in Vite.
+Create `/example/.env` for public API keys:
 
-```
-VITE_LEAKABLE_OPENAI_API_KEY=sk-proj-rest-of-your-key
-VITE_SOME_PUBLIC_KEY=sk-proj-rest-of-your-key
+```bash
+# example/.env
+VITE_LIVEBLOCKS_PUBLIC_KEY=pk_dev_xxxxxxxxxxxxx
 ```
 
-5. Start the development server.
+#### **B. Cloudflare Worker Environment** (Required)
+
+Create `/example/.dev.vars`:
+
+```bash
+# example/.dev.vars
+OPENAI_API_KEY=sk-proj-your-openai-key-here
+STREAM_API_KEY=your-stream-api-key
+STREAM_API_SECRET=your-stream-secret-key
+LIVEBLOCKS_SECRET_KEY=sk_dev_xxxxxxxxxxxxx
+NODE_ENV=development
+PORT=3001
+```
+
+#### **C. Backend Token Service** (Required)
+
+Create `/backend/.env`:
+
+```bash
+# backend/.env
+STREAM_API_KEY=your-stream-api-key
+STREAM_API_SECRET=your-stream-secret-key
+LIVEBLOCKS_SECRET_KEY=sk_dev_xxxxxxxxxxxxx
+NODE_ENV=development
+PORT=3001
+```
+
+### 5. Start Development Servers
+
+#### **Option 1: Start Everything Together** (Recommended)
+
+From the root directory:
 
 ```bash
 pnpm run dev
 ```
 
-6. Open [localhost:5173](http://localhost:5173) in your browser.
+This will start:
+- Frontend (Vite) at `http://localhost:5173`
+- Cloudflare Worker (local) at `http://localhost:8787`
 
-You can now make any changes you wish to the example project.
+#### **Option 2: Start Services Individually**
 
-You can now make any changes you wish to the example project.
-
-**7. Start hacking**
-
-There are a few things you can do right away:
-
-- Tweak the example's system prompt at `./worker/do/openai/system-prompt.ts`.
-- Make the example's system capable of creating new shapes.
-- Make the example's system capable of creating new events.
-
-See the README in `example/worker/do/openai/README.md` for more information on the example's backend.
-
-> Note: If you find yourself needing to make changes to the package code, please let us know on the [tldraw discord channel](https://discord.gg/9PSF2C5KgV). Your changes would be very useful information as we continue to develop the module!
-
-## Installation
-
-For production, install the `@tldraw/ai` package in a new repository, such as a fork of tldraw's [Vite template](https://github.com/tldraw/vite-template). See the [tldraw repository](https://github.com/tldraw/tldraw) for more resources.
-
-Install the `@tldraw/ai` package from NPM or your package manager of choice.
-
+**Terminal 1 - Cloudflare Worker:**
 ```bash
-npm i @tldraw/ai
+cd example
+pnpm wrangler dev --local --port 8787
 ```
 
-## Usage
-
-Use the `useTldrawAi` hook in your code.
-
-```tsx
-function App() {
-	return (
-		<div style={{ position: 'fixed', inset: 0 }}>
-			<Tldraw persistenceKey="example">
-				<MyPromptUi />
-			</Tldraw>
-		</div>
-	)
-}
-
-const TLDRAW_AI_OPTIONS = {
-	transforms: [],
-	generate: async ({ editor, prompt, signal }) => {
-		// todo, return changes
-		return []
-	},
-	stream: async function* ({ editor, prompt, signal }) {
-		// todo, yield each change as it is ready
-	},
-}
-
-function MyPromptUi() {
-	const ai = useTldrawAi(TLDRAW_AI_OPTIONS)
-
-	return (
-		<div style={{ position: 'fixed', bottom: 100, left: 16 }}>
-			<button onClick={() => ai.prompt('draw a unicorn')}>Unicorn</button>
-		</div>
-	)
-}
+**Terminal 2 - Frontend:**
+```bash
+cd example
+pnpm vite dev
 ```
 
-Read on for more tips about using and configuring the hook.
-
-## Guide
-
-### Changes
-
-The fundamental unit in tldraw's ai module is the "change". A change is an instruction to the tldraw editor to do one of the following:
-
-- `createShape` creates a shape
-- `updateShape` updates a shape
-- `deleteShape` deletes a shape
-- `createBinding` creates a binding
-- `updateBinding` updates a binding
-- `deleteBinding` deletes a binding
-
-See `package/src/types.ts` for more about each change.
-
-Changes should be generated by the `generate` or `stream` methods of the `useTldrawAi` configuration. You can do generate the changes using whichever method you wish, however the expectation is that you will send information to an LLM or other model to generate changes for you.
-
-You may find that models are bad at generating changes directly. In our example project, we communicate with the LLM using a "simplified" format, parsing the response before sending back the actual changes expected by the ai module.
-
-### Transforms
-
-The ai module has support for "transforms" (`TldrawAiTransform`). This feature allows you to modify the user's prompt (the data extracted from the canvas) and then use those modifications again later when handling changes. These are useful when preparing the data into a format that is easier for an LLM to work with.
-
-Our example project includes several of these. When extracting data from the canvas, `SimpleIds` transform replaces tldraw's regular ids (which look like `shape:some_long_uuid`) with simplified ids (like `1` or `2`). Later, when handling changes, the transform replaces the simplified ids with their original ids (or creates new ones).
-
-To create a transform, extend the `TldrawAiTransform` class:
-
-```ts
-export class MyCustomTransform extends TldrawAiTransform {
-	override transformPrompt = (prompt: TLAiPrompt) => {
-		// modify the prompt when it's first created
-	}
-
-	override transformChange = (change: TLAiChange) => {
-		// modify each change when it's being handled
-	}
-}
+**Terminal 3 - Backend Token Service:**
+```bash
+cd backend
+pnpm run dev
 ```
 
-Pass your new class to the `useTldrawAi` hook's configuration.
+### 6. Open the Application
 
-```ts
-const MY_STATIC_CONFIG: TldrawAiOptions = {
-	transforms: [MyCustomTransform],
-	...etc,
-}
+Navigate to **http://localhost:5173** in your browser.
+
+## 🎯 Using the Application
+
+### Basic Drawing
+- Use the toolbar to select drawing tools
+- Draw shapes, add text, and create diagrams
+- Changes sync in real-time with other users
+
+### AI Diagram Generation
+1. Click the **AI Generate** button
+2. Enter a prompt (e.g., "Create an ER diagram for a blog system")
+3. The AI will generate shapes and diagrams based on your prompt
+
+### Sample Diagrams
+- Click the **Sample Diagrams** menu
+- Choose from pre-built templates:
+  - ER Diagrams (User, Product, Order, Blog systems)
+  - Flowcharts
+  - Architecture diagrams
+
+### Video Calling
+1. Enter your name in the username field
+2. Click the video icon to start a call
+3. Other users in the room can join the call
+
+### Real-time Collaboration
+1. Share the room URL with others
+2. Multiple users can edit simultaneously
+3. See live cursors and selections from other users
+
+## 🔧 Development Commands
+
+### Root Directory
+```bash
+pnpm install          # Install all dependencies
+pnpm run dev          # Start all development servers
+pnpm run build        # Build all packages
 ```
 
-When the user creates a new prompt, the ai module will create a new instance of each transform to be used for that prompt only. This means that you can stash whatever data you wish on the instance. See the examples in `example/client/transforms` as a reference.
-
-### The hooks
-
-#### `TldrawAiModule`
-
-The `TldrawAiModule` class is responsible for
-
-1. Getting information about the current tldraw editor's canvas
-2. Incorporating transforms before and after changes are generated
-3. Applying "changes" to the tldraw editor's canvas
-
-#### `useTldrawAiModule`
-
-The package exports a hook, `useTldrawAiModule`, that creates an instance of the `TldrawAiModule` class for you to use in React. This class handles tasks such as getting information out of the tldraw canvas and applying changes to the tldraw canvas.
-
-#### `useTldrawAi`
-
-The `useTldrawAi` hook adds an extra layer of convenience around the ai module. This hook handles many of the standard behaviors for you. While we expect to expand this hook to support more configration, you may find it necessary to create your own version of this hook (based on its source code) in order to customize it further.
-
-The hook responds with three methods: `prompt`, `repeat`, and `cancel`.
-
-- `prompt` accepts either a string or a configuration object with `messages` and `stream`. By default, the `prompt` method will call your configuration's `generate` method. If `stream` is true, then it will call your configuration's `stream` method.
-- `cancel` will cancel any currently running generation.
-- `repeat` will apply the same changes that were generated last time. This is useful for debugging.
-
-**Generate vs. Stream**
-
-You don't need to define both `generate` and `stream`, though you should define one of them. If you call `ai.prompt` with the `stream` flag set to true, but don't have `stream` implemented, then you'll get an error; likewise, if you call `ai.prompt` without the `stream` flag and without `generate`, then you'll get an error. Just be sure to implement one or both.
-
-**Static configuration**
-
-If you're using the `useTldrawAi` hook, we recommend creating a custom hook that passes static options to the `useTldrawAi` hook. See the `useTldrawAiExample` hook in our example project as a reference.
-
-```ts
-export function useMyCustomAiHook() {
-	const ai = useTldrawAi(MY_STATIC_OPTIONS)
-}
-
-const MY_STATIC_OPTIONS: TldrawAiOptions = {
-	transforms: [],
-	generate: async ({ editor, prompt, signal }) => {
-		// todo, return changes
-		return []
-	},
-	stream: async function* ({ editor, prompt, signal }) {
-		// todo, yield each change as it is ready
-	},
-}
+### Example Directory (Frontend + Worker)
+```bash
+cd example
+pnpm build            # Build frontend and worker
+pnpm wrangler dev     # Run worker locally
+pnpm vite dev         # Run frontend dev server
 ```
 
-If you _must_ define the options inside of a React component, it's important that you memoize the options correctly.
-
-```tsx
-export function MyPromptUi() {
-	const myMemoizedOptions = useMemo<TldrawAiOptions>(() => {
-		return {
-			transforms: [],
-			generate: async ({ editor, prompt, signal }) => {
-				return []
-			},
-			stream: async function* ({ editor, prompt, signal }) {},
-		}
-	}, [])
-
-	const ai = useTldrawAi(myMemoizedOptions)
-
-	return <etc />
-}
+### Backend Directory (Token Service)
+```bash
+cd backend
+pnpm run dev          # Run with hot reload
+pnpm run build        # Build TypeScript
+pnpm start            # Run production build
 ```
 
-**Calling the hook**
+## 🐛 Troubleshooting
 
-The ai module relies on the tldraw editor at runtime. You should use the `useTldrawAi` hook inside of the tldraw editor's React context, or else provide it with the current `editor` instance as a prop.
+### Port Already in Use
+If you get a "port already in use" error:
+```bash
+# Kill process on port 5173 (frontend)
+lsof -ti:5173 | xargs kill -9
 
-You can do that via a child component:
+# Kill process on port 8787 (worker)
+lsof -ti:8787 | xargs kill -9
 
-```tsx
-function App() {
-	return (
-		<div style={{ position: 'fixed', inset: 0 }}>
-			<Tldraw persistenceKey="example">
-				<MyPromptUi />
-			</Tldraw>
-		</div>
-	)
-}
-
-function MyPromptUi() {
-	const ai = useMyCustomAiHook()
-	return (
-		<div style={{ position: 'fixed', bottom: 100, left: 16 }}>
-			<button onClick={() => ai.prompt('draw a unicorn')}>Unicorn</button>
-		</div>
-	)
-}
+# Kill process on port 3001 (backend)
+lsof -ti:3001 | xargs kill -9
 ```
 
-Or via the Tldraw component's `components` prop:
+### Cloudflare Worker SSL Issues
+If you encounter SSL errors when deploying to Cloudflare Workers:
+- Use local development mode: `pnpm wrangler dev --local`
+- This runs the worker locally without SSL complications
 
-```tsx
-const components: TLComponents = {
-	InFrontOfTheCanvas: () => {
-		const ai = useMyCustomAiHook()
-		return (
-			<div>
-				<button onClick={() => ai.prompt('draw a unicorn')}>Unicorn</button>
-			</div>
-		)
-	},
-}
-
-function App() {
-	return (
-		<div style={{ position: 'fixed', inset: 0 }}>
-			<Tldraw persistenceKey="example" components={components} />
-		</div>
-	)
-}
+### Missing Dependencies
+```bash
+# Clear node_modules and reinstall
+rm -rf node_modules
+pnpm install
 ```
 
-If this is inconvenient—or if you like a challenge—you can also pass the `editor` as an argument to `useTldrawAi`. While this involves some "juggling", it may be useful when you wish to place the ai module into a global context or necessary if you need to use it in different parts of your document tree.
-
-```tsx
-function App() {
-	const [editor, setEditor] = useState<Editor | null>(null)
-
-	return (
-		<div style={{ position: 'fixed', inset: 0 }}>
-			<TldrawBranch onEditorMount={setEditor} />
-			{editor && <MyPromptUi editor={editor} />}
-		</div>
-	)
-}
-
-function TldrawBranch({ onMount }: { onMount: (editor: Editor) => void }) {
-	return (
-		<div style={{ position: 'fixed', inset: 0 }}>
-			<Tldraw persistenceKey="example" onMount={onEditorMount} />
-		</div>
-	)
-}
-
-function MyPromptUi({ editor }: Editor) {
-	const ai = useTldrawAi({ editor, ...MY_STATIC_OPTIONS })
-	return (
-		<div style={{ position: 'fixed', bottom: 100, left: 16 }}>
-			<button onClick={() => ai.prompt('draw a unicorn')}>Unicorn</button>
-		</div>
-	)
-}
+### TypeScript Errors
+```bash
+# Rebuild TypeScript declarations
+pnpm run types
 ```
 
-## License
+## 📦 Building for Production
 
-This project is provided under the MIT license found [here](https://github.com/tldraw/ai/blob/main/LICENSE.md). The tldraw SDK is provided under the [tldraw license](https://github.com/tldraw/tldraw/blob/main/LICENSE.md).
+### Build Frontend and Worker
+```bash
+cd example
+pnpm build
+```
 
-## Trademarks
+### Build Backend
+```bash
+cd backend
+pnpm run build
+```
 
-Copyright (c) 2024-present tldraw Inc. The tldraw name and logo are trademarks of tldraw. Please see our [trademark guidelines](https://github.com/tldraw/tldraw/blob/main/TRADEMARKS.md) for info on acceptable usage.
+### Deploy to Cloudflare (Worker)
+```bash
+cd example
+pnpm wrangler deploy
+```
 
-## Distributions
+**Note**: You may encounter SSL issues with workers.dev subdomain. For production, consider:
+- Using a custom domain
+- Deploying the frontend to Vercel/Netlify
+- Keeping the worker for API endpoints only
 
-You can find the @tldraw/ai package on npm [here](https://www.npmjs.com/package/@tldraw/ai?activeTab=versions). You can find tldraw on npm [here](https://www.npmjs.com/package/@tldraw/tldraw?activeTab=versions).
+## 🤝 API Endpoints
 
-## Contribution
+### Backend Token Service
+- `POST /api/tokens` - Generate Stream video token
+- `GET /api/health` - Health check
+- `POST /api/liveblocks-auth` - Liveblocks authentication
 
-Found a bug? Please [submit an issue](https://github.com/tldraw/ai/issues/new).
+### Cloudflare Worker
+- `/api/generate` - AI diagram generation
+- `/api/stream` - Streaming AI responses
 
-## Community
+## 📚 Additional Documentation
 
-Have questions, comments or feedback? [Join our discord](https://discord.gg/rhsyWMUJxd). For the latest news and release notes, visit [tldraw.dev](https://tldraw.dev).
+- [TLDraw AI Module Guide](./package/README.md)
+- [Compound Diagrams Guide](./COMPOUND_DIAGRAMS_GUIDE.md)
+- [OpenAI Integration](./example/worker/do/openai/README.md)
+- [Collaboration Features](./example/client/features/collaboration/README.md)
 
-## Contact
+## 🔑 Getting API Keys
 
-Find us on Twitter/X at [@tldraw](https://twitter.com/tldraw) or email us at [mailto:hello@tldraw.com](hello@tldraw.com).
+### OpenAI
+1. Visit https://platform.openai.com/api-keys
+2. Create a new API key
+3. Add to `/example/.dev.vars`
+
+### Liveblocks
+1. Sign up at https://liveblocks.io/
+2. Create a new project
+3. Get your secret key from the dashboard
+4. Add to `/example/.dev.vars` and `/backend/.env`
+
+### Stream
+1. Sign up at https://getstream.io/
+2. Create a new app
+3. Get API key and secret from dashboard
+4. Add to `/example/.dev.vars` and `/backend/.env`
+
+## 🏗️ Architecture
+
+### Data Flow
+1. **User draws** → TLDraw editor
+2. **Changes** → Yjs document
+3. **Sync** → Liveblocks (real-time)
+4. **Persist** → Cloudflare Durable Objects
+
+### AI Integration
+1. **User prompt** → Frontend
+2. **Process** → Cloudflare Worker
+3. **Generate** → OpenAI API
+4. **Transform** → Simplified coordinates
+5. **Render** → TLDraw shapes
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is provided under the MIT license. See [LICENSE.md](LICENSE.md) for details.
+
+The tldraw SDK is provided under the [tldraw license](https://github.com/tldraw/tldraw/blob/main/LICENSE.md).
+
+## 🙏 Acknowledgments
+
+- Built with [TLDraw](https://tldraw.dev)
+- AI module based on [@tldraw/ai](https://www.npmjs.com/package/@tldraw/ai)
+- Real-time collaboration powered by [Liveblocks](https://liveblocks.io/)
+- Video calling powered by [Stream](https://getstream.io/)
+
+## 📞 Support
+
+- [TLDraw Discord](https://discord.gg/9PSF2C5KgV)
+- [TLDraw Documentation](https://tldraw.dev)
+
+## 🔗 Links
+
+- [TLDraw GitHub](https://github.com/tldraw/tldraw)
+- [Liveblocks Docs](https://liveblocks.io/docs)
+- [Stream Video SDK Docs](https://getstream.io/video/docs/)
+- [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
