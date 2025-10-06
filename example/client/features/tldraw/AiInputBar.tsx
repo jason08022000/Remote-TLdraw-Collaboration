@@ -102,6 +102,7 @@ export function AiInputBar({ editor, webSocketMessages = [] }: AiInputBarProps) 
 							const change = JSON.parse(match[1])
 							// Collect the change instead of applying it
 							collectedChanges.push(change)
+							console.log(`  📥 Collected change type: ${change.type}`, change)
 						} catch (err) {
 							console.error('JSON parsing error:', err)
 						}
