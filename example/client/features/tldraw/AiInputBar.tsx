@@ -214,7 +214,7 @@ export function AiInputBar({ editor, webSocketMessages = [] }: AiInputBarProps) 
 				<HStack gap={3}>
 					{/* Sample Diagrams Menu */}
 					<SampleDiagramsMenu editor={editor} disabled={isGenerating} />
-
+					
 					{/* AI Generated Diagrams Menu */}
 					<AiGeneratedDiagramsMenu editor={editor} disabled={isGenerating} />
 
