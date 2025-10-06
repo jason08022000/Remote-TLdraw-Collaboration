@@ -1,25 +1,25 @@
 import type {
-	Box,
-	BoxModel,
-	TLBinding,
-	TLBindingCreate,
-	TLBindingId,
-	TLBindingUpdate,
-	TLContent,
-	TLShape,
-	TLShapeId,
-	TLShapePartial,
+    Box,
+    BoxModel,
+    TLBinding,
+    TLBindingCreate,
+    TLBindingId,
+    TLBindingUpdate,
+    TLContent,
+    TLShape,
+    TLShapeId,
+    TLShapePartial,
 } from 'tldraw'
 
 export interface TLAiTextMessage {
-	type: 'text'
-	text: string
+    type: 'text'
+    text: string
 }
 
 export interface TLAiImageMessage {
-	type: 'image'
-	mimeType: string
-	src: string
+    type: 'image'
+    mimeType: string
+    src: string
 }
 
 export type TLAiMessage = TLAiTextMessage | TLAiImageMessage
@@ -30,134 +30,134 @@ export type TLAiMessages = string | TLAiMessage | TLAiMessage[]
  * A prompt with information from the editor.
  */
 export interface TLAiPrompt {
-	/** The user's written prompt or an array of messages */
-	message: string | TLAiMessage[]
-	/** A screenshot */
-	image?: string
-	/** The content pulled from the editor */
-	canvasContent: TLAiContent
-	/** The bounds of the context in the editor */
-	contextBounds: Box
-	/** The bounds of the prompt in the editor */
-	promptBounds: Box
-	/** Any additional information. Must be JSON serializable! */
-	meta?: any
+    /** The user's written prompt or an array of messages */
+    message: string | TLAiMessage[]
+    /** A screenshot */
+    image?: string
+    /** The content pulled from the editor */
+    canvasContent: TLAiContent
+    /** The bounds of the context in the editor */
+    contextBounds: Box
+    /** The bounds of the prompt in the editor */
+    promptBounds: Box
+    /** Any additional information. Must be JSON serializable! */
+    meta?: any
 }
 
 /**
  * A prompt with information from the editor, serialized to JSON.
  */
 export interface TLAiSerializedPrompt extends Omit<TLAiPrompt, 'contextBounds' | 'promptBounds'> {
-	/** The bounds of the context in the editor */
-	contextBounds: BoxModel
-	/** The bounds of the prompt in the editor */
-	promptBounds: BoxModel
+    /** The bounds of the context in the editor */
+    contextBounds: BoxModel
+    /** The bounds of the prompt in the editor */
+    promptBounds: BoxModel
 }
 
 export interface TLAiCreateShapeChange<T extends TLShape = TLShape> {
-	type: 'createShape'
-	description: string
-	shape: TLShapePartial<T>
+    type: 'createShape'
+    description: string
+    shape: TLShapePartial<T>
 }
 
 export interface TLAiUpdateShapeChange<T extends TLShape = TLShape> {
-	type: 'updateShape'
-	description: string
-	shape: Omit<TLShapePartial<T>, 'type'> & { type?: T['type'] } // type is optional
+    type: 'updateShape'
+    description: string
+    shape: Omit<TLShapePartial<T>, 'type'> & { type?: T['type'] } // type is optional
 }
 
 export interface TLAiDeleteShapeChange {
-	type: 'deleteShape'
-	description: string
-	shapeId: TLShapeId
+    type: 'deleteShape'
+    description: string
+    shapeId: TLShapeId
 }
 
 export interface TLAiCreateBindingChange<B extends TLBinding = TLBinding> {
-	type: 'createBinding'
-	description: string
-	binding: TLBindingCreate<B>
+    type: 'createBinding'
+    description: string
+    binding: TLBindingCreate<B>
 }
 
 export interface TLAiUpdateBindingChange<B extends TLBinding = TLBinding> {
-	type: 'updateBinding'
-	description: string
-	binding: TLBindingUpdate<B>
+    type: 'updateBinding'
+    description: string
+    binding: TLBindingUpdate<B>
 }
 
 export interface TLAiDeleteBindingChange {
-	type: 'deleteBinding'
-	description: string
-	bindingId: TLBindingId
+    type: 'deleteBinding'
+    description: string
+    bindingId: TLBindingId
 }
 
 export interface TLAiCreateLinearDiagramChange {
-	type: 'createLinearDiagram'
-	description: string
-	steps: Array<{
-		id: string
-		title: string
-		description?: string
-		color?: string
-	}>
-	direction: 'horizontal' | 'vertical'
-	startPosition: { x: number; y: number }
-	metadata?: {
-		step_count: number
-		spacing?: number
-		boxWidth?: number
-		boxHeight?: number
-	}
+    type: 'createLinearDiagram'
+    description: string
+    steps: Array<{
+        id: string
+        title: string
+        description?: string
+        color?: string
+    }>
+    direction: 'horizontal' | 'vertical'
+    startPosition: { x: number; y: number }
+    metadata?: {
+        step_count: number
+        spacing?: number
+        boxWidth?: number
+        boxHeight?: number
+    }
 }
 
 export interface TLAiCreateTableChange {
-	type: 'createTable'; 
-	description: string; 
+    type: 'createTable';
+    description: string;
 
-	// Table-specific properties
-	rows: Array<{
-		id: string;
-		cells: Array<{
-			id: string;
-			content: string;
-			colspan?: number;
-			rowspan?: number;
-			//align?: 'left' | 'center' | 'right';
-			color?: string;
-		}>;
-	}>;
+    // Table-specific properties
+    rows: Array<{
+        id: string;
+        cells: Array<{
+            id: string;
+            content: string;
+            colspan?: number;
+            rowspan?: number;
+            //align?: 'left' | 'center' | 'right';
+            color?: string;
+        }>;
+    }>;
 
-	layout: 'grid'; 
-	startPosition: { x: number; y: number };
+    layout: 'grid';
+    startPosition: { x: number; y: number };
 
-	metadata?: {
-		rowHeight?: number;
-		colWidth?: number;
-		borderColor?: string;
-		borderWidth?: number;
-		spacing?: number;
-	};
+    metadata?: {
+        rowHeight?: number;
+        colWidth?: number;
+        borderColor?: string;
+        borderWidth?: number;
+        spacing?: number;
+    };
 }
 
 /**
  * A generated change that can be applied to the editor.
  */
 export type TLAiChange =
-	| TLAiCreateShapeChange
-	| TLAiUpdateShapeChange
-	| TLAiDeleteShapeChange
-	| TLAiCreateBindingChange
-	| TLAiUpdateBindingChange
-	| TLAiDeleteBindingChange
-	| TLAiCreateLinearDiagramChange
-	| TLAiCreateTableChange
+    | TLAiCreateShapeChange
+    | TLAiUpdateShapeChange
+    | TLAiDeleteShapeChange
+    | TLAiCreateBindingChange
+    | TLAiUpdateBindingChange
+    | TLAiDeleteBindingChange
+    | TLAiCreateLinearDiagramChange
+    | TLAiCreateTableChange
 
 export type TLAiContent = Omit<TLContent, 'schema' | 'rootShapeIds'> & {
-	bindings: TLBinding[]
+    bindings: TLBinding[]
 }
 
 /**
  * The response from the AI.
  */
 export type TLAiResult = {
-	changes: TLAiChange[]
+    changes: TLAiChange[]
 }
