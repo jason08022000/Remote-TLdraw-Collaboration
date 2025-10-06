@@ -3,15 +3,17 @@ import { Box } from '@chakra-ui/react'
 import { Editor, Tldraw } from 'tldraw'
 import { useCollaborativeTldraw } from '../../hooks/useCollaborativeTldraw'
 import { AiInputBar } from './AiInputBar'
+import { TranscriptionMessage } from '../../hooks/useWebSocket'
 
 interface TldrawCanvasProps {
 	isVisible: boolean
+	webSocketMessages?: TranscriptionMessage[]
 }
 
 // Toggle this to disable collaboration for testing
 const USE_COLLABORATION = true;
 
-function CollaborativeTldrawCanvas({ isVisible }: TldrawCanvasProps) {
+function CollaborativeTldrawCanvas({ isVisible, webSocketMessages }: TldrawCanvasProps) {
 	const [editor, setEditor] = useState<Editor | null>(null)
 	const store = useCollaborativeTldraw()
 
@@ -45,11 +47,11 @@ function CollaborativeTldrawCanvas({ isVisible }: TldrawCanvasProps) {
 			</Box>
 			
 			{/* AI Input Bar */}
-			{editor && <AiInputBar editor={editor} />}
+			{editor && <AiInputBar editor={editor} webSocketMessages={webSocketMessages} />}
 		</Box>
 	)
 }
 
-export function TldrawCanvas({ isVisible }: TldrawCanvasProps) {
-	return <CollaborativeTldrawCanvas isVisible={isVisible} />
+export function TldrawCanvas({ isVisible, webSocketMessages }: TldrawCanvasProps) {
+	return <CollaborativeTldrawCanvas isVisible={isVisible} webSocketMessages={webSocketMessages} />
 }
