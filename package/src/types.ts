@@ -110,6 +110,35 @@ export interface TLAiCreateLinearDiagramChange {
 }
 
 /**
+ * Timeline compound diagram change
+ */
+export interface TLAiCreateTimelineChange {
+	type: 'createTimeline'
+	description: string
+	items: Array<{
+		id: string
+		title: string
+		start: string            // ISO date or datetime
+		end?: string             // optional ISO; if missing -> milestone
+		description?: string
+		color?: string
+		lane?: string            // optional group/track
+	}>
+	layout: 'horizontal' | 'vertical'
+	startPosition: { x: number; y: number }
+	metadata?: {
+		scale?: 'days' | 'weeks' | 'months' | 'years' | 'auto'
+		timelineStart?: string
+		timelineEnd?: string
+		itemWidth?: number
+		itemHeight?: number
+		hSpacing?: number
+		vSpacing?: number
+		laneSpacing?: number
+	}
+}
+
+/**
  * A generated change that can be applied to the editor.
  */
 export type TLAiChange =
@@ -120,6 +149,7 @@ export type TLAiChange =
 	| TLAiUpdateBindingChange
 	| TLAiDeleteBindingChange
 	| TLAiCreateLinearDiagramChange
+	| TLAiCreateTimelineChange
 
 export type TLAiContent = Omit<TLContent, 'schema' | 'rootShapeIds'> & {
 	bindings: TLBinding[]

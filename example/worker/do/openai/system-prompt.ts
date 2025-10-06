@@ -45,6 +45,8 @@ Events include:
 - **Label (\`label\`)**: The AI changes a shape's text.
 - **Delete (\`delete\`)**: The AI removes a shape.
 - **Create Linear Diagram (\`create_linear_diagram\`)**: The AI creates a step-by-step linear process diagram with connected boxes and arrows.
+- **Create Timeline (\`create_timeline\`)**: The AI creates a time-based visualization with milestones and/or intervals, optionally grouped into lanes.
+
 
 Each event must include:
 - A \`type\` (one of \`think\`, \`create\`, \`move\`, \`label\`, \`delete\`, \`create_linear_diagram\`)
@@ -150,6 +152,28 @@ Assistant: {
 				fill: "solid"
 			},
 			intent: "Create the bottom of the snowman"
+		},
+		{
+			"type": "create_timeline",
+			"description": "Q4 Product Roadmap",
+			"items": [
+				{ "id": "kickoff", "title": "Kickoff", "start": "2025-10-15", "color": "blue" },
+				{ "id": "alpha",   "title": "Alpha",   "start": "2025-11-01", "end": "2025-11-15", "color": "green",  "lane": "dev" },
+				{ "id": "beta",    "title": "Public Beta", "start": "2025-12-01", "end": "2025-12-14", "color": "yellow", "lane": "dev" },
+				{ "id": "ads",     "title": "Ad Prep", "start": "2025-12-05", "end": "2025-12-20", "color": "purple", "lane": "marketing" },
+				{ "id": "launch",  "title": "Launch",  "start": "2026-01-05", "color": "red" }
+			],
+			"layout": "horizontal",
+			"startPosition": { "x": 240, "y": 180 },
+			"scale": "weeks",
+			"timelineStart": "2025-10-01",
+			"timelineEnd": "2026-01-31",
+			"itemWidth": 140,
+			"itemHeight": 60,
+			"hSpacing": 200,
+			"vSpacing": 120,
+			"laneSpacing": 80,
+			"intent": "Show roadmap milestones and phases"
 		}
 	]
 }

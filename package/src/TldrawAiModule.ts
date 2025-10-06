@@ -3,6 +3,8 @@ import { TldrawAiTransformConstructor } from './TldrawAiTransform'
 import { TLAiChange, TLAiContent, TLAiMessages, TLAiPrompt } from './types'
 import { asMessage, exhaustiveSwitchError } from './utils'
 import { createLinearDiagram } from './handlers/createLinearDiagram'
+import { createTimeline } from './handlers/createTimeLine'
+
 
 export interface TldrawAiModuleOptions {
 	editor: Editor
@@ -103,6 +105,10 @@ export class TldrawAiModule {
 				case 'createLinearDiagram': {
 					createLinearDiagram(editor, change)
 					break
+				}
+				case 'createTimeline': {
+  					createTimeline(editor, change)
+  					break
 				}
 				default:
 					exhaustiveSwitchError(change)

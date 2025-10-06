@@ -202,12 +202,43 @@ const SimpleLinearDiagramEvent = z.object({
 })
 export type ISimpleLinearDiagramEvent = z.infer<typeof SimpleLinearDiagramEvent>
 
+const SimpleTimelineItem = z.object({
+  id: z.string(),
+  title: z.string(),
+  start: z.string(),                  // ISO date/datetime
+  end: z.string().optional(),
+  description: z.string().optional(),
+  color: SimpleColor.optional(),
+  lane: z.string().optional(),
+})
+
+export const SimpleTimelineEvent = z.object({
+  type: z.literal('create_timeline'),
+  description: z.string(),
+  items: z.array(SimpleTimelineItem),
+  layout: z.enum(['horizontal', 'vertical']),
+  startPosition: z.object({ x: z.number(), y: z.number() }),
+  scale: z.enum(['days','weeks','months','years','auto']).optional(),
+  timelineStart: z.string().optional(),
+  timelineEnd: z.string().optional(),
+  itemWidth: z.number().optional(),
+  itemHeight: z.number().optional(),
+  hSpacing: z.number().optional(),
+  vSpacing: z.number().optional(),
+  laneSpacing: z.number().optional(),
+  intent: z.string(),
+})
+
+export type ISimpleTimelineEvent = z.infer<typeof SimpleTimelineEvent>
+
+
 export const SimpleEvent = z.union([
 	SimpleThinkEvent,
 	SimpleCreateEvent, // or update
 	SimpleDeleteEvent,
 	SimpleMoveEvent,
 	SimpleLinearDiagramEvent,
+	SimpleTimelineEvent,
 ])
 
 export type ISimpleEvent = z.infer<typeof SimpleEvent>

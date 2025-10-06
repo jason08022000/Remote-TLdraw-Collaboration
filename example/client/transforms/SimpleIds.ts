@@ -92,6 +92,9 @@ export class SimpleIds extends TldrawAiTransform {
 				// They contain simple step IDs that are handled by the createLinearDiagram handler
 				return change
 			}
+			case 'createTimeline': {
+				return change
+			}
 			default:
 				return exhaustiveSwitchError(change)
 		}

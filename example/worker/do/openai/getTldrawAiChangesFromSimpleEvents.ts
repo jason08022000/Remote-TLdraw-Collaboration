@@ -5,6 +5,7 @@ import {
 	TLAiCreateShapeChange,
 	TLAiSerializedPrompt,
 	TLAiUpdateShapeChange,
+	TLAiCreateTimelineChange, // 👈 added
 } from '@tldraw/ai'
 import { exhaustiveSwitchError } from '@tldraw/ai/src/utils'
 import {
@@ -25,6 +26,7 @@ import {
 	ISimpleFill,
 	ISimpleLinearDiagramEvent,
 	ISimpleMoveEvent,
+	ISimpleTimelineEvent, // 👈 added
 } from './schema'
 
 export function getTldrawAiChangesFromSimpleEvents(
@@ -44,6 +46,9 @@ export function getTldrawAiChangesFromSimpleEvents(
 		}
 		case 'create_linear_diagram': {
 			return getTldrawAiChangesFromSimpleLinearDiagramEvent(prompt, event)
+		}
+		case 'create_timeline': { // 👈 added
+			return getTldrawAiChangesFromSimpleTimelineEvent(prompt, event)
 		}
 		case 'think': {
 			return []
@@ -331,6 +336,55 @@ function getTldrawAiChangesFromSimpleLinearDiagramEvent(
 			boxWidth,
 			boxHeight,
 			spacing,
+		},
+	}
+
+	return [change]
+}
+
+function getTldrawAiChangesFromSimpleTimelineEvent(
+	_prompt: TLAiSerializedPrompt,
+	event: ISimpleTimelineEvent
+): TLAiChange[] {
+	const {
+		description,
+		items,
+		layout,
+		startPosition,
+		scale,
+		timelineStart,
+		timelineEnd,
+		itemWidth,
+		itemHeight,
+		hSpacing,
+		vSpacing,
+		laneSpacing,
+		intent,
+	} = event
+
+	const change: TLAiCreateTimelineChange = {
+		type: 'createTimeline',
+		description: description || intent,
+		items: items.map(it => ({
+			id: it.id,
+			title: it.title,
+			start: it.start,
+			end: it.end,
+			description: it.description,
+			color: it.color,
+			lane: it.lane,
+		})),
+		layout,
+		startPosition,
+		metadata: {
+			scale,
+			timelineStart,
+			timelineEnd,
+			itemWidth,
+			itemHeight,
+			hSpacing,
+			vSpacing,
+			laneSpacing,
 		},
 	}
 

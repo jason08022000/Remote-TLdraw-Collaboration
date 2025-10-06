@@ -70,6 +70,15 @@ export class SimpleCoordinates extends TldrawAiTransform {
 				}
 				return transformedChange
 			}
+			case 'createTimeline': {
+				return {
+					...change,
+					startPosition: {
+					x: change.startPosition.x + this.bounds.x,
+					y: change.startPosition.y + this.bounds.y,
+					},
+				}
+			}
 			default: {
 				return change
 			}
