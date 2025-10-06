@@ -1,4 +1,7 @@
 import { TLAiMessage, TLAiMessages } from './types'
+import { toRichText } from 'tldraw'
+props: { richText: toRichText('...') }
+
 
 /** @public */
 export function exhaustiveSwitchError(value: never, property?: string): never {

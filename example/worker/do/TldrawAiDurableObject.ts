@@ -4,6 +4,7 @@ import { AutoRouter, error } from 'itty-router'
 import { TldrawAiBaseService } from '../TldrawAiBaseService'
 import { Environment } from '../types'
 import { OpenAiService } from './openai/OpenAiService'
+import { toRichText } from 'tldraw'
 
 export class TldrawAiDurableObject extends DurableObject<Environment> {
 	service: TldrawAiBaseService
@@ -78,22 +79,22 @@ export class TldrawAiDurableObject extends DurableObject<Environment> {
 			changes: [],
 		}
 
-		;(async () => {
-			try {
-				const prompt = await request.json()
+			; (async () => {
+				try {
+					const prompt = await request.json()
 
-				for await (const change of this.service.stream(prompt as TLAiSerializedPrompt)) {
-					response.changes.push(change)
-					const data = `data: ${JSON.stringify(change)}\n\n`
-					await writer.write(encoder.encode(data))
-					await writer.ready
+					for await (const change of this.service.stream(prompt as TLAiSerializedPrompt)) {
+						response.changes.push(change)
+						const data = `data: ${JSON.stringify(change)}\n\n`
+						await writer.write(encoder.encode(data))
+						await writer.ready
+					}
+					await writer.close()
+				} catch (error) {
+					console.error('Stream error:', error)
+					await writer.abort(error)
 				}
-				await writer.close()
-			} catch (error) {
-				console.error('Stream error:', error)
-				await writer.abort(error)
-			}
-		})()
+			})()
 
 		return new Response(readable, {
 			headers: {

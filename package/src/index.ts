@@ -11,3 +11,4 @@ export {
 	type TldrawAiStreamFn,
 } from './useTldrawAi'
 export { asMessage, exhaustiveSwitchError } from './utils'
+export * from './boundary-object'; 

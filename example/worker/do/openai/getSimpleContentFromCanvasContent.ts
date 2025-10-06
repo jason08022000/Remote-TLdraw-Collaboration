@@ -7,8 +7,33 @@ import {
 	TLNoteShape,
 	TLTextShape,
 } from 'tldraw'
+import { toRichText } from 'tldraw'
+props: { richText: toRichText('...') }
+
 import { shapeFillToSimpleFill } from './conversions'
 import { ISimpleShape } from './schema'
+
+// 将 richText 提取为纯字符串（尽量兼容多种结构，取不到就返回空串）
+function richTextToPlain(rt: any): string {
+	if (!rt) return ''
+	try {
+		// 常见结构：{ children: [...] } 或 { spans: [...] }
+		const pick = (n: any): string => {
+			if (!n) return ''
+			if (Array.isArray(n)) return n.map(pick).join('')
+			if (typeof n === 'string') return n
+			// 一些节点可能是 { text: '...' }
+			if (typeof n.text === 'string') return n.text
+			// 递归 children / spans
+			if (n.children) return pick(n.children)
+			if (n.spans) return pick(n.spans)
+			return ''
+		}
+		return pick(rt)
+	} catch {
+		return ''
+	}
+}
 
 export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 	shapes: ISimpleShape[]
@@ -21,11 +46,12 @@ export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 					return {
 						shapeId: s.id,
 						type: 'text',
-						text: s.props.text,
+						// ⬇️ 由 richText 提取纯文本（原来这里是 s.props.text）
+						text: richTextToPlain((s.props as any).richText),
 						x: s.x,
 						y: s.y,
-						color: s.props.color,
-						textAlign: s.props.textAlign,
+						color: (s.props as any).color,
+						textAlign: (s.props as any).textAlign,
 						note: (s.meta?.description as string) ?? '',
 					}
 				}
@@ -38,11 +64,12 @@ export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 							type: s.props.geo,
 							x: s.x,
 							y: s.y,
-							width: s.props.w,
-							height: s.props.h,
-							color: s.props.color,
-							fill: shapeFillToSimpleFill(s.props.fill),
-							text: s.props.text,
+							width: (s.props as any).w,
+							height: (s.props as any).h,
+							color: (s.props as any).color,
+							fill: shapeFillToSimpleFill((s.props as any).fill),
+							// ⬇️ geo 文字也来自 richText
+							text: richTextToPlain((s.props as any).richText),
 							note: (s.meta?.description as string) ?? '',
 						}
 					}
@@ -60,7 +87,7 @@ export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 						y1: points[0].y + s.y,
 						x2: points[1].x + s.x,
 						y2: points[1].y + s.y,
-						color: s.props.color,
+						color: (s.props as any).color,
 						note: (s.meta?.description as string) ?? '',
 					}
 				}
@@ -83,8 +110,9 @@ export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 						y1: s.props.start.y,
 						x2: s.props.end.x,
 						y2: s.props.end.y,
-						color: s.props.color,
-						text: s.props.text,
+						color: (s.props as any).color,
+						// ⬇️ 箭头的 label 仍然是 text（v4 里 arrow 不是 richText）
+						text: (s.props as any).text ?? '',
 						note: (s.meta?.description as string) ?? '',
 					}
 				}
@@ -96,13 +124,14 @@ export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 						type: 'note',
 						x: s.x,
 						y: s.y,
-						color: s.props.color,
-						text: s.props.text,
+						color: (s.props as any).color,
+						// ⬇️ note 也改用 richText
+						text: richTextToPlain((s.props as any).richText),
 						note: (s.meta?.description as string) ?? '',
 					}
 				}
 
-				// Any other shape is unknown
+				// 其它类型做兜底
 				return {
 					shapeId: shape.id,
 					type: 'unknown',

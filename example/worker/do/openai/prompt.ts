@@ -5,6 +5,9 @@ import {
 	ChatCompletionDeveloperMessageParam,
 	ChatCompletionUserMessageParam,
 } from 'openai/resources'
+import { toRichText } from 'tldraw'
+props: { richText: toRichText('...') }
+
 import { getSimpleContentFromCanvasContent } from './getSimpleContentFromCanvasContent'
 import { OPENAI_SYSTEM_PROMPT } from './system-prompt'
 

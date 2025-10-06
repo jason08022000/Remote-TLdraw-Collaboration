@@ -20,7 +20,7 @@ export class SimpleCoordinates extends TldrawAiTransform {
 			for (const key in s.props) {
 				const v = (s.props as any)[key]
 				if (Number.isFinite(v)) {
-					;(s.props as any)[key] = Math.floor(v)
+					; (s.props as any)[key] = Math.floor(v)
 				}
 			}
 		}
@@ -60,6 +60,17 @@ export class SimpleCoordinates extends TldrawAiTransform {
 				}
 			}
 			case 'createLinearDiagram': {
+				// Transform startPosition coordinates back to world coordinates
+				const transformedChange = {
+					...change,
+					startPosition: {
+						x: change.startPosition.x + this.bounds.x,
+						y: change.startPosition.y + this.bounds.y,
+					}
+				}
+				return transformedChange
+			}
+			case 'createDecisionMatrix': {
 				// Transform startPosition coordinates back to world coordinates
 				const transformedChange = {
 					...change,

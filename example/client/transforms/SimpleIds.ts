@@ -92,6 +92,11 @@ export class SimpleIds extends TldrawAiTransform {
 				// They contain simple step IDs that are handled by the createLinearDiagram handler
 				return change
 			}
+			case 'createDecisionMatrix': {
+				// Decision matrix changes don't contain TLDraw IDs that need transformation
+				// They contain simple option/criterion IDs that are handled by the createDecisionMatrix handler
+				return change
+			}
 			default:
 				return exhaustiveSwitchError(change)
 		}
@@ -109,19 +114,17 @@ export class SimpleIds extends TldrawAiTransform {
 		}
 
 		if (obj.fromId && !originalIdsToSimpleIds.has(obj.fromId)) {
-			const tId = `${nextSimpleId}`
-			simpleIdsToOriginalIds.set(tId, obj.id)
-			originalIdsToSimpleIds.set(obj.id, tId)
-			this.nextSimpleId++
+			const tId = `${this.nextSimpleId++}`
+			simpleIdsToOriginalIds.set(tId, obj.fromId)
+			originalIdsToSimpleIds.set(obj.fromId, tId)
 			obj.fromId = tId
 		}
 
 		if (obj.toId && !originalIdsToSimpleIds.has(obj.toId)) {
-			const tId = `${nextSimpleId}`
-			simpleIdsToOriginalIds.set(tId, obj.id)
-			originalIdsToSimpleIds.set(obj.id, tId)
-			this.nextSimpleId++
-			obj.fromId = tId
+			const tId = `${this.nextSimpleId++}`
+			simpleIdsToOriginalIds.set(tId, obj.toId)
+			originalIdsToSimpleIds.set(obj.toId, tId)
+			obj.toId = tId
 		}
 	}
 

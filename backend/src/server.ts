@@ -1,3 +1,4 @@
+import './config/loadEnv';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -30,7 +31,7 @@ class Server {
 
     // CORS - configure for your frontend domain in production
     this.app.use(cors({
-      origin: isDevelopment 
+      origin: isDevelopment
         ? ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175']
         : process.env.ALLOWED_ORIGINS?.split(',') || [],
       credentials: true,
@@ -94,7 +95,7 @@ class Server {
       console.log(`🌍 Environment: ${env.NODE_ENV}`);
       console.log(`🔗 Health check: http://localhost:${this.port}/api/health`);
       console.log(`🎯 Token endpoint: http://localhost:${this.port}/api/tokens`);
-      
+
       if (isDevelopment) {
         console.log(`🔧 Development mode: detailed logging enabled`);
       }

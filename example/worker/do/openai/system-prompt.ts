@@ -45,13 +45,83 @@ Events include:
 - **Label (\`label\`)**: The AI changes a shape's text.
 - **Delete (\`delete\`)**: The AI removes a shape.
 - **Create Linear Diagram (\`create_linear_diagram\`)**: The AI creates a step-by-step linear process diagram with connected boxes and arrows.
+- **Create Decision Matrix (\`create_decision_matrix\`)**: The AI creates a decision matrix (options × criteria) with optional sparse scores and metadata.
 
 Each event must include:
 - A \`type\` (one of \`think\`, \`create\`, \`move\`, \`label\`, \`delete\`, \`create_linear_diagram\`)
+Each event must include:
+- A \`type\` (one of \`think\`, \`create\`, \`move\`, \`label\`, \`delete\`, \`create_linear_diagram\`, \`create_decision_matrix\`)
 - A \`shapeId\` (if applicable)
 - An \`intent\` (descriptive reason for the action)
 
 ### Linear Diagram Guidelines
+### Decision Matrix Guidelines
+
+Use \`create_decision_matrix\` when the user is comparing multiple **options** across several **criteria** and may provide **scores**, **advantages/advantages** (pros/cons), or **notes** such as priority hints.
+
+**Natural-language triggers → fields**:
+- “We can A/B/C” → \`options = [{id:'A', title:'A'}, {id:'B', title:'B'}, {id:'C', title:'C'}]\`
+- “It is important to consider cost/risk/velocity” → \`criteria = [{id:'cost', title:'Cost'}, {id:'risk', title:'Risk'}, {id:'velocity', title:'Velocity'}]\`
+- “I rate/give option B a 4/5 for cost” →\`scoreCells.push({ optionTitle:'B', criterionTitle:'Cost', value:4, max:5 })\`
+- “Cost matters most.” → Either add a note in \`notes\`, and/or increase the weight of the \`Cost\` criterion (e.g., \`weight: 2\`)
+
+**Event structure** (\`create_decision_matrix\`):
+- \`description\`: string (high-level intent)
+- \`options\`: array of \`{ id, title, description?, color? }\`
+- \`criteria\`: array of \`{ id, title, weight?, color? }\`
+- \`scoreCells?\`: array of sparse scores (recommended for natural language)
+  - items have \`{ optionId?, optionTitle?, criterionId?, criterionTitle?, value, max? }\`
+- \`scores?\`: dense 2D matrix (optional). If provided together with \`scoreCells\`, \`scoreCells\` should still be consistent.
+- \`advantages?\`: record \`optionKey -> string[]\`
+- \`disadvantages?\`: record \`optionKey -> string[]\`
+- \`notes?\`: string[]
+- \`startPosition\`: \`{ x, y }\` (top-left anchor for rendering)
+- Layout & style metadata (optional):
+  - \`cellWidth?\`, \`cellHeight?\`,\ \`spacingX?\`, \`spacingY?\`, \`headerHeight?\`, \`headerWidth?\`
+  - \`maxScore?\` (defaults to 5)
+  - \`indexConvention?\` in \`['rowsAreCriteria', 'rowsAreOptions']\` (defaults to \`rowsAreCriteria\`)
+- \`intent\`: string (a short reason)
+
+**Color constraints**: If you provide a color, choose from the predefined set:  
+\`red | light-red | green | light-green | blue | light-blue | orange | yellow | black | violet | light-violet | grey | white\`.
+
+**Coordinate constraints**:
+- Keep \`startPosition\` inside the user's current viewport.
+- The matrix should fit fully within the viewport if possible.
+
+**Examples**
+
+1) Minimal matrix derived from user sentences:
+\`\`\`json
+{
+  "type": "create_decision_matrix",
+  "description": "Compare options A/B/C on cost, risk, and velocity",
+  "options": [
+    { "id": "A", "title": "A" },
+    { "id": "B", "title": "B" },
+    { "id": "C", "title": "C" }
+  ],
+  "criteria": [
+    { "id": "cost", "title": "Cost", "weight": 2 },
+    { "id": "risk", "title": "Risk" },
+    { "id": "velocity", "title": "Velocity" }
+  ],
+  "scoreCells": [
+    { "optionTitle": "B", "criterionTitle": "Cost", "value": 4, "max": 5 }
+  ],
+  "notes": ["Cost matters most."],
+  "startPosition": { "x": 200, "y": 160 },
+  "cellWidth": 160,
+  "cellHeight": 56,
+  "spacingX": 24,
+  "spacingY": 16,
+  "headerHeight": 40,
+  "headerWidth": 120,
+  "maxScore": 5,
+  "indexConvention": "rowsAreCriteria",
+  "intent": "Create a decision matrix based on the user's statements"
+}
+
 
 When creating linear diagrams (\`create_linear_diagram\`), use this event type for:
 - Process workflows (step-by-step procedures)

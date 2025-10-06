@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { TLAiMessage } from './types'
 import { asMessage, exhaustiveSwitchError } from './utils'
+import { toRichText } from 'tldraw'
+props: { richText: toRichText('...') }
+
 
 describe('utils', () => {
 	describe('asMessage', () => {

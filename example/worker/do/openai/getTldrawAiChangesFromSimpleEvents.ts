@@ -2,11 +2,15 @@ import {
 	TLAiChange,
 	TLAiCreateBindingChange,
 	TLAiCreateLinearDiagramChange,
+	TLAiCreateDecisionMatrixChange,
 	TLAiCreateShapeChange,
 	TLAiSerializedPrompt,
 	TLAiUpdateShapeChange,
 } from '@tldraw/ai'
-import { exhaustiveSwitchError } from '@tldraw/ai/src/utils'
+// import { exhaustiveSwitchError } from '@tldraw/ai/src/utils'
+
+
+
 import {
 	IndexKey,
 	TLArrowBinding,
@@ -24,8 +28,10 @@ import {
 	ISimpleEvent,
 	ISimpleFill,
 	ISimpleLinearDiagramEvent,
+	ISimpleDecisionMatrixEvent,
 	ISimpleMoveEvent,
 } from './schema'
+
 
 export function getTldrawAiChangesFromSimpleEvents(
 	prompt: TLAiSerializedPrompt,
@@ -44,6 +50,9 @@ export function getTldrawAiChangesFromSimpleEvents(
 		}
 		case 'create_linear_diagram': {
 			return getTldrawAiChangesFromSimpleLinearDiagramEvent(prompt, event)
+		}
+		case 'create_decision_matrix': {
+			return getTldrawAiChangesFromSimpleDecisionMatrixEvent(prompt, event)
 		}
 		case 'think': {
 			return []
@@ -142,16 +151,36 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 					y: 0,
 					props: {
 						color: shape.color ?? 'black',
-						text: shape.text ?? '',
 						start: { x: x1, y: y1 },
 						end: { x: x2, y: y2 },
 					},
 				},
 			} satisfies TLAiCreateShapeChange<TLArrowShape> | TLAiUpdateShapeChange<TLArrowShape>)
 
+			// If the simple shape provided text, create a separate text shape at the midpoint
+			if (shape.text && shape.text.trim().length > 0) {
+				const midX = (x1 + x2) / 2
+				const midY = (y1 + y2) / 2
+				changes.push({
+					type: 'createShape',
+					description: 'arrow label',
+					shape: {
+						// let downstream transforms/id normalizers handle id if needed
+						type: 'text',
+						x: midX,
+						y: midY,
+						props: {
+							richText: toRichText(shape.text),
+							color: shape.color ?? 'black',
+							textAlign: 'middle',
+						},
+					} as any,
+				} satisfies TLAiCreateShapeChange<TLTextShape>)
+			}
+
 			if (shapeEventType === 'updateShape') {
 				// Updating bindings is complicated, it's easier to just delete all bindings and recreate them
-				for (const binding of prompt.canvasContent.bindings.filter((b) => b.fromId === 'shapeId')) {
+				for (const binding of prompt.canvasContent.bindings.filter((b) => b.fromId === shapeId)) {
 					changes.push({
 						type: 'deleteBinding',
 						description: 'cleaning up old bindings',
@@ -335,4 +364,83 @@ function getTldrawAiChangesFromSimpleLinearDiagramEvent(
 	}
 
 	return [change]
+}
+
+function getTldrawAiChangesFromSimpleDecisionMatrixEvent(
+	_prompt: TLAiSerializedPrompt,
+	event: ISimpleDecisionMatrixEvent
+): TLAiChange[] {
+	const {
+		description,
+		options,
+		criteria,
+		scores,
+		scoreCells,
+		advantages,
+		disadvantages,
+		notes,
+		startPosition,
+		cellWidth,
+		cellHeight,
+		spacingX,
+		spacingY,
+		headerHeight,
+		headerWidth,
+		maxScore,
+		indexConvention,
+		intent,
+	} = event
+
+	const change: TLAiCreateDecisionMatrixChange = {
+		type: 'createDecisionMatrix',
+		description: description || intent,
+		options: options.map(o => ({
+			id: o.id,
+			title: o.title,
+			description: o.description,
+			color: o.color,
+		})),
+		criteria: criteria.map(c => ({
+			id: c.id,
+			title: c.title,
+			weight: c.weight,
+			color: c.color,
+		})),
+
+		// 两种记分都支持：优先让前端从 scoreCells 落格
+		scoreCells: scoreCells?.map(s => ({
+			optionId: s.optionId,
+			optionTitle: s.optionTitle,
+			criterionId: s.criterionId,
+			criterionTitle: s.criterionTitle,
+			value: s.value,
+			max: s.max,
+		})),
+		scores, // 可选：若后端直接给了二维矩阵，也一并传递
+
+		advantages,
+		disadvantages,
+		notes,
+
+		startPosition,
+
+		metadata: {
+			option_count: options.length,
+			criteria_count: criteria.length,
+			cellWidth,
+			cellHeight,
+			spacingX,
+			spacingY,
+			headerHeight,
+			headerWidth,
+			maxScore,
+			indexConvention, // 'rowsAreCriteria' | 'rowsAreOptions'
+		},
+	}
+
+	return [change]
+}
+
+function exhaustiveSwitchError(x: never, key = 'type'): never {
+	throw new Error(`Unhandled ${key}: ${JSON.stringify(x)}`)
 }

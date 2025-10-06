@@ -200,6 +200,62 @@ const SimpleLinearDiagramEvent = z.object({
 	spacing: z.number().optional(),
 	intent: z.string(),
 })
+
+const SimpleDecisionMatrixEvent = z.object({
+	type: z.literal('create_decision_matrix'),
+	description: z.string(),
+
+	// 列：选项
+	options: z.array(z.object({
+		id: z.string(),
+		title: z.string(),
+		description: z.string().optional(),
+		color: SimpleColor.optional(),
+	})),
+
+	// 行：标准/维度
+	criteria: z.array(z.object({
+		id: z.string(),
+		title: z.string(),
+		weight: z.number().optional(),
+		color: SimpleColor.optional(),
+	})),
+
+	// 稀疏记分（推荐给 LLM 输出）
+	scoreCells: z.array(z.object({
+		optionId: z.string().optional(),
+		optionTitle: z.string().optional(),
+		criterionId: z.string().optional(),
+		criterionTitle: z.string().optional(),
+		value: z.number(),
+		max: z.number().optional(),
+	})).optional(),
+
+	// 稠密矩阵（可选，行列语义见 indexConvention）
+	scores: z.array(z.array(z.number())).optional(),
+
+	// pros / cons / notes
+	advantages: z.record(z.array(z.string())).optional(),
+	disadvantages: z.record(z.array(z.string())).optional(),
+	notes: z.array(z.string()).optional(),
+
+	startPosition: z.object({ x: z.number(), y: z.number() }),
+
+	// 布局与样式参数（与前端 metadata 对齐）
+	cellWidth: z.number().optional(),
+	cellHeight: z.number().optional(),
+	spacingX: z.number().optional(),
+	spacingY: z.number().optional(),
+	headerHeight: z.number().optional(),
+	headerWidth: z.number().optional(),
+	maxScore: z.number().optional(),
+	indexConvention: z.enum(['rowsAreCriteria', 'rowsAreOptions']).optional(),
+
+	intent: z.string(),
+})
+export type ISimpleDecisionMatrixEvent = z.infer<typeof SimpleDecisionMatrixEvent>
+
+
 export type ISimpleLinearDiagramEvent = z.infer<typeof SimpleLinearDiagramEvent>
 
 export const SimpleEvent = z.union([
@@ -208,7 +264,9 @@ export const SimpleEvent = z.union([
 	SimpleDeleteEvent,
 	SimpleMoveEvent,
 	SimpleLinearDiagramEvent,
+	SimpleDecisionMatrixEvent,
 ])
+
 
 export type ISimpleEvent = z.infer<typeof SimpleEvent>
 
