@@ -161,3 +161,12 @@ export type TLAiContent = Omit<TLContent, 'schema' | 'rootShapeIds'> & {
 export type TLAiResult = {
     changes: TLAiChange[]
 }
+
+// estella added
+export type TLAiCreateNowNextLaterChange = {
+    type: 'createNowNextLater'
+    items: Array<{ text: string; column?: 'now' | 'next' | 'later' }>
+    startPosition: { x: number; y: number }
+    size?: { width: number; height: number } // 整个面板尺寸，默认 900×540
+    metadata?: { columnTitles?: { now: string; next: string; later: string } }
+}
