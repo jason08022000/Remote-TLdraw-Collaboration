@@ -9,6 +9,7 @@ export function createTable(editor: Editor, change: TLAiCreateTableChange): void
     const baseColWidth = metadata?.colWidth || 120
     const baseRowHeight = metadata?.rowHeight || 80
     const spacing = metadata?.spacing ?? 6
+    const maxColWidth = (metadata as any)?.maxColWidth ?? 280 // ✅ 新增：列宽上限（可选）
 
     if (!rows || rows.length === 0) return
 
@@ -23,7 +24,8 @@ export function createTable(editor: Editor, change: TLAiCreateTableChange): void
             const text = (cell.content || '').trim()
             const len = text.length
             const estWidth = Math.max(baseColWidth, 40 + len * 10)
-            if (estWidth > columnWidths[i]) columnWidths[i] = estWidth
+            const capped = Math.min(maxColWidth, estWidth) // ✅ 新增：应用上限
+            if (capped > columnWidths[i]) columnWidths[i] = capped
         })
     })
 
@@ -42,11 +44,10 @@ export function createTable(editor: Editor, change: TLAiCreateTableChange): void
                 const isHeader = rowIndex === 0
                 const isEvenRow = rowIndex % 2 === 0
 
-                const cellColor = isHeader
-                    ? 'light-blue'
-                    : isEvenRow
-                        ? 'light-green'
-                        : 'light-red'
+                // ✅ 新增：优先使用 cell.color；否则沿用你原来的表头/条纹行配色
+                const cellColor =
+                    (cell as any)?.color ??
+                    (isHeader ? 'light-blue' : isEvenRow ? 'light-green' : 'light-red')
 
                 const shapeId = `shape:table-cell-${batchId}-${rowIndex}-${colIndex}` as TLShapeId
 
@@ -72,11 +73,11 @@ export function createTable(editor: Editor, change: TLAiCreateTableChange): void
             })
 
             // Wait a bit for TLDraw to calculate text bounds
-            await new Promise(resolve => setTimeout(resolve, 10))
+            await new Promise((resolve) => setTimeout(resolve, 10))
 
             // Find max height in this row
             let maxHeight = baseRowHeight
-            rowCellIds.forEach(cellId => {
+            rowCellIds.forEach((cellId) => {
                 const bounds = editor.getShapePageBounds(cellId)
                 if (bounds) {
                     maxHeight = Math.max(maxHeight, bounds.h)
@@ -86,14 +87,14 @@ export function createTable(editor: Editor, change: TLAiCreateTableChange): void
             console.log(`Row ${rowIndex}: maxHeight = ${maxHeight}`)
 
             // Update all cells in this row to the max height
-            const updates = rowCellIds.map(cellId => ({
+            const updates = rowCellIds.map((cellId) => ({
                 id: cellId,
                 type: 'geo' as const,
                 props: {
                     h: maxHeight,
                 },
             }))
-            
+
             editor.updateShapes(updates as any)
 
             // Move Y offset down for next row

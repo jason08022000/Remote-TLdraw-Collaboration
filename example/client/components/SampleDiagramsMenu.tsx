@@ -1,6 +1,6 @@
 import { useCallback, useState, useRef, useEffect } from 'react'
-import { 
-	IconButton, 
+import {
+	IconButton,
 	Box,
 	Button,
 	VStack
@@ -35,8 +35,8 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 					],
 					direction: 'horizontal',
 					startPosition: { x: 100, y: 200 },
-					metadata: { 
-						step_count: 4, 
+					metadata: {
+						step_count: 4,
 						spacing: 180,
 						boxWidth: 140,
 						boxHeight: 90
@@ -56,8 +56,8 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 					],
 					direction: 'horizontal',
 					startPosition: { x: 100, y: 350 },
-					metadata: { 
-						step_count: 4, 
+					metadata: {
+						step_count: 4,
 						spacing: 160,
 						boxWidth: 100,
 						boxHeight: 70
@@ -78,8 +78,8 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 					],
 					direction: 'horizontal',
 					startPosition: { x: 50, y: 500 },
-					metadata: { 
-						step_count: 5, 
+					metadata: {
+						step_count: 5,
 						spacing: 150,
 						boxWidth: 130,
 						boxHeight: 60
@@ -391,6 +391,140 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 				}
 				break
 
+			// 🆕 Now–Next–Later：复用 createTable，三列分桶
+			case 'nowNextLater': {
+				const raw = window.prompt(
+					'Enter items (one per line). Optional prefix: #now / #next / #later\nExample:\n#now Fix login bug\n#next Add search\nImprove docs'
+				) ?? ''
+				const lines = raw.split(/\n+/).map(s => s.trim()).filter(Boolean)
+				if (lines.length === 0) return
+
+				// 分桶：有前缀按前缀放，否则轮询放入三列
+				const now: string[] = []
+				const next: string[] = []
+				const later: string[] = []
+				let rr = 0
+				for (const t of lines) {
+					const m = t.match(/^#(now|next|later)\s+/i)
+					const text = m ? t.replace(/^#(now|next|later)\s+/i, '') : t
+					if (m) {
+						const tag = m[1].toLowerCase()
+						if (tag === 'now') now.push(text)
+						else if (tag === 'next') next.push(text)
+						else later.push(text)
+					} else {
+						if (rr % 3 === 0) now.push(text)
+						else if (rr % 3 === 1) next.push(text)
+						else later.push(text)
+						rr++
+					}
+				}
+
+				const maxRows = Math.max(now.length, next.length, later.length)
+				const rows: Array<{ id: string; cells: Array<{ id: string; content: string; color?: string }> }> = []
+
+				// 表头
+				rows.push({
+					id: 'nnl_r0',
+					cells: [
+						{ id: 'nnl_c0', content: 'Now', color: 'light-green' },
+						{ id: 'nnl_c1', content: 'Next', color: 'light-blue' },
+						{ id: 'nnl_c2', content: 'Later', color: 'light-yellow' },
+					],
+				})
+
+				// 内容行
+				for (let i = 0; i < maxRows; i++) {
+					rows.push({
+						id: `nnl_r${i + 1}`,
+						cells: [
+							{ id: `nnl_c${3 * (i + 1) + 0}`, content: now[i] ?? '' },
+							{ id: `nnl_c${3 * (i + 1) + 1}`, content: next[i] ?? '' },
+							{ id: `nnl_c${3 * (i + 1) + 2}`, content: later[i] ?? '' },
+						],
+					})
+				}
+
+				change = {
+					type: 'createTable',
+					description: 'Now – Next – Later board (as a 3-column table)',
+					rows,
+					layout: 'grid',
+					startPosition: { x: 120, y: 120 },
+					metadata: {
+						rowHeight: 56,
+						colWidth: 220,
+						borderColor: 'black',
+						borderWidth: 1,
+						spacing: 4,
+					},
+				}
+				break
+			}
+
+			case 'moscow':
+				change = {
+					type: 'createTable',
+					description: 'MoSCoW Prioritization matrix',
+					rows: [
+						{
+							id: 'moscow_r1',
+							cells: [
+								{ id: 'moscow_c1', content: 'Must Have', color: 'red' },
+								{ id: 'moscow_c2', content: 'Should Have', color: 'orange' },
+								{ id: 'moscow_c3', content: 'Could Have', color: 'yellow' },
+								{ id: 'moscow_c4', content: "Won't Have", color: 'grey' },
+							],
+						},
+						{
+							id: 'moscow_r2',
+							cells: [
+								{ id: 'moscow_c5', content: 'User authentication' },
+								{ id: 'moscow_c6', content: 'Email notifications' },
+								{ id: 'moscow_c7', content: 'Dark mode theme' },
+								{ id: 'moscow_c8', content: 'Advanced analytics' },
+							],
+						},
+						{
+							id: 'moscow_r3',
+							cells: [
+								{ id: 'moscow_c9', content: 'Data backup' },
+								{ id: 'moscow_c10', content: 'Mobile app' },
+								{ id: 'moscow_c11', content: 'Custom themes' },
+								{ id: 'moscow_c12', content: 'AI integration' },
+							],
+						},
+						{
+							id: 'moscow_r4',
+							cells: [
+								{ id: 'moscow_c13', content: 'Core functionality' },
+								{ id: 'moscow_c14', content: 'Performance optimization' },
+								{ id: 'moscow_c15', content: 'Social features' },
+								{ id: 'moscow_c16', content: 'Legacy support' },
+							],
+						},
+						{
+							id: 'moscow_r5',
+							cells: [
+								{ id: 'moscow_c17', content: 'Security features' },
+								{ id: 'moscow_c18', content: 'User dashboard' },
+								{ id: 'moscow_c19', content: 'Export options' },
+								{ id: 'moscow_c20', content: 'Offline mode' },
+							],
+						},
+					],
+					layout: 'grid',
+					startPosition: { x: 100, y: 100 },
+					metadata: {
+						rowHeight: 60,
+						colWidth: 180,
+						borderColor: 'black',
+						borderWidth: 2,
+						spacing: 4,
+					},
+				}
+				break
+
 			default:
 				return
 		}
@@ -436,7 +570,7 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 			>
 				<TbTemplate />
 			</IconButton>
-			
+
 			{isOpen && (
 				<Box
 					position="absolute"
@@ -462,7 +596,7 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 						>
 							🟢 User Onboarding
 						</Button>
-						
+
 						<Button
 							size="sm"
 							variant="ghost"
@@ -473,7 +607,7 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 						>
 							🔵 Development Workflow
 						</Button>
-						
+
 						<Button
 							size="sm"
 							variant="ghost"
@@ -550,6 +684,19 @@ export function SampleDiagramsMenu({ editor, disabled }: SampleDiagramsMenuProps
 						>
 							📅 Weekly Schedule
 						</Button>
+
+
+						<Button
+							size="sm"
+							variant="ghost"
+							colorScheme="teal"
+							onClick={() => handleSelect('moscow')}
+							justifyContent="flex-start"
+							_hover={{ bg: 'teal.50' }}
+						>
+							🧭 MoSCoW Prioritization
+						</Button>
+
 					</VStack>
 				</Box>
 			)}
