@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box } from '@chakra-ui/react'
+import { Box, Text } from '@chakra-ui/react'
 import { Editor, Tldraw } from 'tldraw'
 import { useCollaborativeTldraw } from '../../hooks/useCollaborativeTldraw'
 import { AiInputBar } from './AiInputBar'
@@ -15,13 +15,28 @@ const USE_COLLABORATION = true;
 
 function CollaborativeTldrawCanvas({ isVisible, webSocketMessages }: TldrawCanvasProps) {
 	const [editor, setEditor] = useState<Editor | null>(null)
-	const store = useCollaborativeTldraw()
+	const storeWithStatus = useCollaborativeTldraw()
 
 	// Put the editor on the window for debugging
 	useEffect(() => {
 		if (!editor) return
 		;(window as any).editor = editor
 	}, [editor])
+
+	// Wait for the store to be ready before rendering
+	if (storeWithStatus.status === 'loading') {
+		return (
+			<Box 
+				h="100%" 
+				display="flex" 
+				alignItems="center" 
+				justifyContent="center"
+				opacity={isVisible ? 1 : 0}
+			>
+				<Text>Loading collaborative editor...</Text>
+			</Box>
+		)
+	}
 
 	return (
 		<Box 
@@ -35,7 +50,7 @@ function CollaborativeTldrawCanvas({ isVisible, webSocketMessages }: TldrawCanva
 			<Box position="relative" overflow="hidden">
 				{USE_COLLABORATION ? (
 					<Tldraw 
-						store={store}
+						store={storeWithStatus}
 						onMount={setEditor}
 					/>
 				) : (
