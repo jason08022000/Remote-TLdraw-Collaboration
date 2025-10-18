@@ -14,7 +14,7 @@ import { ConnectionStatus } from './components/ConnectionStatus'
 import { useUser } from './contexts/UserContext'
 import { useWebSocket } from './hooks/useWebSocket'
 
-const WEBSOCKET_URL = 'ws://127.0.0.1:8799'
+const WEBSOCKET_URL = 'ws://127.0.0.1:8999'
 
 function App() {
 	const { hasSetDetails, roomId, userName, resetUserDetails } = useUser()
